@@ -1,0 +1,15 @@
+# Append to /etc/caddy/Caddyfile and run `sudo systemctl reload caddy`.
+# Caddy auto-issues Let's Encrypt certs as long as DNS A records resolve here.
+
+okiyo.kz, www.okiyo.kz {
+    encode gzip zstd
+
+    handle {
+        reverse_proxy 127.0.0.1:3010
+    }
+
+    log {
+        output file /var/log/caddy/okiyo.access.log
+        format json
+    }
+}

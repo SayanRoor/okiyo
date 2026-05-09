@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: okiyo_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: okiyo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: okiyo
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U okiyo -d okiyo"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: okiyo_web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URI: postgres://okiyo:${POSTGRES_PASSWORD}@postgres:5432/okiyo
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-https://okiyo.kz}
+      PAYLOAD_MEDIA_DIR: /var/data/media
+    volumes:
+      - ./data/media:/var/data/media
+    ports:
+      - "127.0.0.1:3010:3000"
