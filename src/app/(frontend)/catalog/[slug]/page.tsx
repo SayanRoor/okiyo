@@ -8,6 +8,8 @@ import { formatPrice, mediaAlt, mediaUrl } from "@/lib/format";
 import { payload } from "@/lib/payload";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 
+export const dynamic = "force-dynamic";
+
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params) {

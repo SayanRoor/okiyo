@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { payload } from "@/lib/payload";
 
+export const dynamic = "force-dynamic";
+
 type Params = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ page?: string }>;

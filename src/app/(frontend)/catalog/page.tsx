@@ -7,6 +7,7 @@ export const metadata = {
   title: "Каталог",
   description: "Каталог мебели — диваны, кровати, столы и аксессуары.",
 };
+export const dynamic = "force-dynamic";
 
 export default async function CatalogPage({
   searchParams,
