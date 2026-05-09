@@ -50,12 +50,15 @@ export default async function ProductPage({ params }: Params) {
 
   const main = mediaUrl(product.mainImage, "hero");
   const mainAlt = mediaAlt(product.mainImage) || product.title;
-  const gallery = (product.gallery ?? [])
+  type GalleryItem = { url: string | null; alt: string };
+  const gallery: GalleryItem[] = (product.gallery ?? [])
     .map((g: { image?: unknown }) => ({
       url: mediaUrl(g.image, "card"),
       alt: mediaAlt(g.image),
     }))
-    .filter((g: { url: string | null }) => g.url);
+    .filter((g: GalleryItem): g is GalleryItem & { url: string } =>
+      Boolean(g.url),
+    );
 
   const category =
     typeof product.category === "object" && product.category
@@ -126,7 +129,7 @@ export default async function ProductPage({ params }: Params) {
           ) : null}
           {gallery.length > 0 ? (
             <div className="mt-4 grid grid-cols-4 gap-3">
-              {gallery.map((g, idx) => (
+              {gallery.map((g: GalleryItem, idx: number) => (
                 <div
                   key={idx}
                   className="relative aspect-square rounded-lg overflow-hidden border border-(--border) bg-(--card)"
