@@ -34,6 +34,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./next.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
+COPY --chown=nextjs:nodejs scripts/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 USER nextjs
 EXPOSE 3000
-CMD ["node", "node_modules/next/dist/bin/next", "start"]
+CMD ["./entrypoint.sh"]
