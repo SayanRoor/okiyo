@@ -36,4 +36,4 @@ COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./next.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 USER nextjs
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["node", "node_modules/next/dist/bin/next", "start"]
