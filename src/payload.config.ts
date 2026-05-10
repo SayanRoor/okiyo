@@ -11,6 +11,7 @@ import { Media } from "./collections/Media";
 import { Products } from "./collections/Products";
 import { Users } from "./collections/Users";
 import { Settings } from "./globals/Settings";
+import { migrations } from "./migrations";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -30,7 +31,11 @@ export default buildConfig({
   editor: lexicalEditor(),
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
-    push: true,
+    // В dev — push: схема в БД синхронизируется при старте без миграций.
+    // В prod — push: false, схема меняется только через явные миграции из ./migrations,
+    // которые применяются скриптом `entrypoint.sh` (`payload migrate`) при старте контейнера.
+    push: process.env.NODE_ENV !== "production",
+    prodMigrations: migrations,
   }),
   sharp,
   typescript: {
