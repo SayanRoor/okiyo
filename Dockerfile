@@ -31,11 +31,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/src ./src
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/seed ./seed
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./next.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
-COPY --chown=nextjs:nodejs scripts/entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+RUN chmod +x ./scripts/entrypoint.sh
 USER nextjs
 EXPOSE 3000
-CMD ["./entrypoint.sh"]
+CMD ["./scripts/entrypoint.sh"]
