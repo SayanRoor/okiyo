@@ -6,6 +6,18 @@ export function formatPrice(value: number): string {
   }).format(value);
 }
 
+function relativize(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // Strip any absolute origin so Next.js Image treats it as a local URL
+  // (matches `images.localPatterns` instead of needing `remotePatterns`).
+  try {
+    const parsed = new URL(url);
+    return parsed.pathname + parsed.search + parsed.hash;
+  } catch {
+    return url;
+  }
+}
+
 export function mediaUrl(
   media: unknown,
   size?: "thumbnail" | "card" | "hero",
@@ -15,8 +27,8 @@ export function mediaUrl(
     url?: string | null;
     sizes?: Record<string, { url?: string | null }>;
   };
-  if (size && m.sizes?.[size]?.url) return m.sizes[size].url ?? null;
-  return m.url ?? null;
+  if (size && m.sizes?.[size]?.url) return relativize(m.sizes[size].url);
+  return relativize(m.url);
 }
 
 export function mediaAlt(media: unknown): string {
