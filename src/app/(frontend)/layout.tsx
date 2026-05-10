@@ -15,7 +15,7 @@ const sans = Manrope({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await (await payload()).findGlobal({ slug: "settings" });
-  const siteName = settings.siteName || "okiyo";
+  const siteName = settings.siteName || "OKIYO";
   return {
     title: {
       default: settings.metaTitle || siteName,
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description:
       settings.metaDescription ||
-      "Каталог мебели — диваны, кровати, столы, стулья и аксессуары для дома.",
+      "OKIYO — японские очки с минималистичным силуэтом. Лёгкий ацетат, поляризация UV400, бессрочная гарантия каркаса.",
     metadataBase: new URL(
       process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3000",
     ),

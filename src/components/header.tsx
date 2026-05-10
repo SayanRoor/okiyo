@@ -32,7 +32,7 @@ export function Header({
           {logoUrl ? (
             <Image
               src={logoUrl}
-              alt={settings.siteName || "okiyo"}
+              alt={settings.siteName || "OKIYO"}
               width={40}
               height={40}
               className="h-10 w-10 rounded object-contain"
@@ -40,7 +40,7 @@ export function Header({
           ) : null}
           <div className="min-w-0">
             <div className="text-lg md:text-xl font-semibold tracking-tight text-(--primary) truncate">
-              {settings.siteName || "okiyo"}
+              {settings.siteName || "OKIYO"}
             </div>
             {settings.tagline ? (
               <div className="text-xs text-(--muted) truncate">

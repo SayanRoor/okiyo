@@ -1,0 +1,104 @@
+[
+  {
+    "id": "kaze",
+    "slug": "kaze",
+    "name": "KAZE",
+    "description": "Прямоугольная оправа в духе старой Японии. Лёгкий ударопрочный каркас, ровные грани, поляризационные линзы UV400.",
+    "price": 32500,
+    "currency": "KZT",
+    "shape": "rectangle",
+    "images": ["/products/kaze-1.jpg", "/products/kaze-2.png", "/products/kaze-3.jpg"],
+    "variants": [
+      { "id": "kaze-black", "name": "Black", "hex": "#0B0B0B", "stock": 12 },
+      { "id": "kaze-brown", "name": "Brown", "hex": "#5A3A2A", "stock": 7 },
+      { "id": "kaze-sand", "name": "Sand", "hex": "#D9C9A9", "stock": 5 }
+    ],
+    "isNew": true,
+    "createdAt": "2026-04-20T00:00:00.000Z"
+  },
+  {
+    "id": "takeshi",
+    "slug": "takeshi",
+    "name": "TAKESHI",
+    "description": "Угловатые линии и уверенный силуэт. Для тех, кто говорит коротко и по делу.",
+    "price": 32500,
+    "currency": "KZT",
+    "shape": "angled",
+    "images": ["/products/takeshi-1.jpg", "/products/takeshi-2.png"],
+    "variants": [
+      { "id": "takeshi-black", "name": "Black", "hex": "#0B0B0B", "stock": 9 },
+      { "id": "takeshi-brown", "name": "Brown", "hex": "#7A4A2A", "stock": 4 }
+    ],
+    "isNew": true,
+    "createdAt": "2026-04-19T00:00:00.000Z"
+  },
+  {
+    "id": "fuji",
+    "slug": "fuji",
+    "name": "FUJI",
+    "description": "Овал, отражающий силуэт горы. Универсальная посадка, мягкая дужка.",
+    "price": 32500,
+    "currency": "KZT",
+    "shape": "oval",
+    "images": ["/products/fuji-1.png", "/products/fuji-2.png", "/products/fuji-3.jpg"],
+    "variants": [
+      { "id": "fuji-black", "name": "Black", "hex": "#0B0B0B", "stock": 10 },
+      { "id": "fuji-amber", "name": "Amber", "hex": "#A86A2A", "stock": 6 }
+    ],
+    "isNew": false,
+    "createdAt": "2026-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "one",
+    "slug": "one",
+    "name": "ONE",
+    "description": "Минималистичная классика. Один силуэт — три цвета. Каждый день.",
+    "price": 32500,
+    "currency": "KZT",
+    "shape": "classic",
+    "images": [
+      "/products/one-1.png",
+      "/products/one-black.png",
+      "/products/one-khaki.png",
+      "/products/one-darkbrown.png"
+    ],
+    "variants": [
+      { "id": "one-black", "name": "Black", "hex": "#0B0B0B", "image": "/products/one-black.png", "stock": 14 },
+      { "id": "one-khaki", "name": "Khaki", "hex": "#5C5A3A", "image": "/products/one-khaki.png", "stock": 5 },
+      { "id": "one-darkbrown", "name": "Dark brown", "hex": "#3A2418", "image": "/products/one-darkbrown.png", "stock": 6 }
+    ],
+    "isNew": false,
+    "createdAt": "2026-02-01T00:00:00.000Z"
+  },
+  {
+    "id": "classic",
+    "slug": "classic",
+    "name": "CLASSIC",
+    "description": "Спокойный силуэт без лишнего. Универсальная классика, которая идёт всем.",
+    "price": 32500,
+    "currency": "KZT",
+    "shape": "classic",
+    "images": ["/products/classic-1.png", "/products/classic-2.jpg"],
+    "variants": [
+      { "id": "classic-black", "name": "Black", "hex": "#0B0B0B", "stock": 8 },
+      { "id": "classic-tortoise", "name": "Tortoise", "hex": "#7A4A2A", "stock": 3 }
+    ],
+    "isNew": false,
+    "createdAt": "2026-01-20T00:00:00.000Z"
+  },
+  {
+    "id": "kuro",
+    "slug": "kuro",
+    "name": "KURO",
+    "description": "Глубокий чёрный, минимализм без компромиссов. Для тех, кто выбирает один раз.",
+    "price": 32500,
+    "currency": "KZT",
+    "shape": "rectangle",
+    "images": ["/products/kuro-1.jpg"],
+    "variants": [
+      { "id": "kuro-black", "name": "Black", "hex": "#0B0B0B", "stock": 6 }
+    ],
+    "isNew": true,
+    "createdAt": "2026-04-25T00:00:00.000Z"
+  }
+]

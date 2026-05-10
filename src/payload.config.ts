@@ -22,7 +22,7 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: {
-      titleSuffix: " — okiyo admin",
+      titleSuffix: " — OKIYO admin",
     },
   },
   collections: [Users, Media, Categories, Products, Leads],

@@ -13,7 +13,7 @@ export const Settings: GlobalConfig = {
         {
           label: "Шапка",
           fields: [
-            { name: "siteName", type: "text", required: true, defaultValue: "okiyo" },
+            { name: "siteName", type: "text", required: true, defaultValue: "OKIYO" },
             {
               name: "logo",
               type: "upload",
@@ -47,15 +47,21 @@ export const Settings: GlobalConfig = {
           label: "Главная",
           fields: [
             {
+              name: "heroEyebrow",
+              type: "text",
+              defaultValue: "Spring Collection — 2026",
+              admin: { description: "Маленькая надпись над заголовком" },
+            },
+            {
               name: "heroTitle",
               type: "text",
-              defaultValue: "Мебель для вашего дома",
+              defaultValue: "Тише линий — ярче взгляд.",
             },
             {
               name: "heroSubtitle",
               type: "textarea",
               defaultValue:
-                "Каталог тщательно подобранной мебели — от диванов до спален.",
+                "OKIYO — японские очки с минималистичным силуэтом. Лёгкий ацетат, поляризация UV400, бессрочная гарантия каркаса.",
             },
             {
               name: "heroImage",
@@ -66,12 +72,19 @@ export const Settings: GlobalConfig = {
             {
               name: "heroCtaLabel",
               type: "text",
-              defaultValue: "Смотреть каталог",
+              defaultValue: "Смотреть коллекцию",
             },
             {
               name: "heroCtaHref",
               type: "text",
               defaultValue: "/catalog",
+            },
+            {
+              name: "trustBadges",
+              type: "array",
+              label: "Бейджи доверия (под hero CTA)",
+              maxRows: 4,
+              fields: [{ name: "text", type: "text", required: true }],
             },
           ],
         },

@@ -19,10 +19,10 @@ export function Footer({ settings }: { settings: Settings }) {
       <div className="container-x py-14 grid gap-10 md:grid-cols-4">
         <div>
           <div className="text-2xl font-semibold tracking-tight">
-            {settings.siteName || "okiyo"}
+            {settings.siteName || "OKIYO"}
           </div>
           <p className="mt-3 text-sm text-(--background)/70 max-w-xs">
-            Каталог мебели, собранный с заботой о деталях.
+            Японские очки с минималистичным силуэтом.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export function Footer({ settings }: { settings: Settings }) {
         </div>
       </div>
       <div className="border-t border-(--background)/15 py-6 text-center text-xs text-(--background)/60">
-        © {year} {settings.siteName || "okiyo"}. Все права защищены.
+        © {year} {settings.siteName || "OKIYO"}. Все права защищены.
       </div>
     </footer>
   );

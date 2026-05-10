@@ -5,7 +5,7 @@ import { payload } from "@/lib/payload";
 
 export const metadata = {
   title: "Каталог",
-  description: "Каталог мебели — диваны, кровати, столы и аксессуары.",
+  description: "Коллекция OKIYO — японские очки разных форм оправ.",
 };
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,7 @@ export default async function CatalogPage({
           <p className="mt-2 text-(--muted)">
             {products.totalDocs > 0
               ? `${products.totalDocs} товаров`
-              : "Каталог пока пуст — первые товары появятся скоро."}
+              : "Скоро здесь появится новая коллекция."}
           </p>
         </div>
         {categories.docs.length > 0 ? (

@@ -1,0 +1,28 @@
+{
+  "hero": {
+    "eyebrow": "Spring Collection — 2026",
+    "title": "Тише линий —\nярче взгляд.",
+    "description": "OKIYO — японские очки с минималистичным силуэтом. Лёгкий ацетат, поляризация UV400, бессрочная гарантия каркаса.",
+    "primaryCtaLabel": "Смотреть коллекцию",
+    "primaryCtaHref": "/catalog",
+    "secondaryCtaLabel": "Примерить онлайн",
+    "secondaryCtaHref": "/try-on",
+    "trust": [
+      "Поляризация UV400",
+      "Доставка по Алматы — 2 ч",
+      "Оплата счётом или Kaspi QR"
+    ]
+  },
+  "features": {
+    "tryOn": true
+  },
+  "announcement": {
+    "enabled": true,
+    "text": "Бесплатная доставка по Алматы • Привезём за 2 часа"
+  },
+  "contact": {
+    "whatsapp": "77001234567",
+    "instagram": "https://instagram.com/okiyo.kz",
+    "email": "hello@okiyo.kz"
+  }
+}

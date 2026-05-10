@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#E8E2D6"/>
+  <g fill="none" stroke="#0B0B0B" stroke-width="3">
+    <ellipse cx="140" cy="150" rx="60" ry="35"/>
+    <ellipse cx="260" cy="150" rx="60" ry="35"/>
+    <path d="M200 150 Q200 130 200 150"/>
+    <path d="M80 150 L40 130"/>
+    <path d="M320 150 L360 130"/>
+  </g>
+  <text x="200" y="240" text-anchor="middle" font-family="serif" font-size="14" letter-spacing="6" fill="#0B0B0B">OKIYO</text>
+</svg>

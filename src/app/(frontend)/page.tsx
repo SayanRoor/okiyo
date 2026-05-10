@@ -44,8 +44,13 @@ export default async function HomePage() {
           />
         ) : null}
         <div className="container-x relative py-20 md:py-32 max-w-3xl">
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">
-            {settings.heroTitle || "Мебель для вашего дома"}
+          {settings.heroEyebrow ? (
+            <div className="text-xs uppercase tracking-[0.2em] text-(--accent) mb-4">
+              {settings.heroEyebrow}
+            </div>
+          ) : null}
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight whitespace-pre-line">
+            {settings.heroTitle || "Тише линий — ярче взгляд."}
           </h1>
           {settings.heroSubtitle ? (
             <p className="mt-5 text-lg md:text-xl text-white/85 max-w-xl">
@@ -56,8 +61,20 @@ export default async function HomePage() {
             href={settings.heroCtaHref || "/catalog"}
             className="mt-8 inline-flex items-center rounded-md bg-(--accent) text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
           >
-            {settings.heroCtaLabel || "Смотреть каталог"}
+            {settings.heroCtaLabel || "Смотреть коллекцию"}
           </Link>
+          {settings.trustBadges && settings.trustBadges.length > 0 ? (
+            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/75">
+              {settings.trustBadges.map(
+                (b: { id?: string | null; text: string }, i: number) => (
+                  <li key={b.id ?? i} className="flex items-center gap-2">
+                    <span className="inline-block w-1 h-1 rounded-full bg-(--accent)" />
+                    {b.text}
+                  </li>
+                ),
+              )}
+            </ul>
+          ) : null}
         </div>
       </section>
 
@@ -134,11 +151,11 @@ export default async function HomePage() {
         <div className="container-x grid md:grid-cols-2 gap-10 items-start">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-(--primary)">
-              Не нашли нужное?
+              Не нашли свою оправу?
             </h2>
             <p className="mt-3 text-(--muted) max-w-md">
-              Оставьте заявку — менеджер свяжется и подберёт мебель под ваш
-              интерьер и бюджет.
+              Оставьте заявку — менеджер свяжется, поможет с подбором формы
+              и привезёт на примерку по Алматы.
             </p>
           </div>
           <LeadForm />
