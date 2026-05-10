@@ -79,7 +79,10 @@ export function ProductGallery({
   return (
     <div>
       {displayedMain ? (
-        <div className="relative aspect-square rounded-xl overflow-hidden border border-(--border) bg-(--card)">
+        <div
+          className="relative aspect-square overflow-hidden"
+          style={{ background: "var(--card)" }}
+        >
           <Image
             src={displayedMain.url}
             alt={displayedMain.alt}
@@ -89,10 +92,15 @@ export function ProductGallery({
             className="object-cover"
           />
         </div>
-      ) : null}
+      ) : (
+        <div
+          className="aspect-square"
+          style={{ background: "var(--card)" }}
+        />
+      )}
 
       {allImages.length > 1 && !colorImage ? (
-        <div className="mt-4 grid grid-cols-4 gap-3">
+        <div className="mt-3 grid grid-cols-4 gap-3">
           {allImages.map((img, idx) => {
             const thumb = toThumb(
               idx === 0 ? mainImage : gallery?.[idx - 1]?.image,
@@ -109,15 +117,24 @@ export function ProductGallery({
                 }}
                 aria-label={`Показать фото ${idx + 1}`}
                 aria-pressed={isActive}
-                className={
-                  "relative aspect-square rounded-lg overflow-hidden border bg-(--card) transition " +
-                  (isActive
-                    ? "border-(--accent) ring-2 ring-(--accent)/40"
-                    : "border-(--border) hover:border-(--accent)")
-                }
+                className="relative aspect-square overflow-hidden transition"
+                style={{
+                  background: "var(--card)",
+                  outline: isActive
+                    ? "1px solid var(--ink)"
+                    : "1px solid var(--line)",
+                  outlineOffset: 0,
+                  cursor: "pointer",
+                }}
               >
                 {thumb ? (
-                  <Image src={thumb.url} alt={thumb.alt} fill sizes="20vw" className="object-cover" />
+                  <Image
+                    src={thumb.url}
+                    alt={thumb.alt}
+                    fill
+                    sizes="20vw"
+                    className="object-cover"
+                  />
                 ) : null}
               </button>
             );
@@ -126,14 +143,24 @@ export function ProductGallery({
       ) : null}
 
       {safeColors.length > 0 ? (
-        <div className="mt-6">
-          <div className="text-sm text-(--muted) mb-3">
-            Цвет:{" "}
-            <span className="text-(--primary) font-medium">
-              {activeColorIdx >= 0 ? safeColors[activeColorIdx].name : "выберите вариант"}
+        <div className="mt-7">
+          <div
+            className="mb-3"
+            style={{
+              fontSize: 11,
+              color: "var(--muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.18em",
+            }}
+          >
+            Цвет ·{" "}
+            <span style={{ color: "var(--ink)" }}>
+              {activeColorIdx >= 0
+                ? safeColors[activeColorIdx].name
+                : "выберите вариант"}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             {safeColors.map((c, idx) => {
               const isActive = idx === activeColorIdx;
               const outOfStock = typeof c.stock === "number" && c.stock <= 0;
@@ -141,9 +168,7 @@ export function ProductGallery({
                 <button
                   type="button"
                   key={`${c.hex}-${idx}`}
-                  onClick={() => {
-                    setActiveColorIdx(idx);
-                  }}
+                  onClick={() => setActiveColorIdx(idx)}
                   aria-label={c.name}
                   aria-pressed={isActive}
                   title={
@@ -151,17 +176,23 @@ export function ProductGallery({
                       ? `${c.name} · ${c.stock} в наличии`
                       : c.name
                   }
-                  className={
-                    "relative w-9 h-9 rounded-full ring-offset-2 transition " +
-                    (isActive
-                      ? "ring-2 ring-(--accent) ring-offset-(--background)"
-                      : "ring-1 ring-(--border) hover:ring-(--accent)") +
-                    (outOfStock ? " opacity-40" : "")
-                  }
-                  style={{ backgroundColor: c.hex }}
+                  className="relative rounded-full transition"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    background: c.hex,
+                    border: isActive
+                      ? "2px solid var(--ink)"
+                      : "1px solid var(--line)",
+                    cursor: "pointer",
+                    opacity: outOfStock ? 0.4 : 1,
+                  }}
                 >
                   {outOfStock ? (
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-white/90">
+                    <span
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ fontSize: 10, color: "var(--bg)" }}
+                    >
                       ✕
                     </span>
                   ) : null}

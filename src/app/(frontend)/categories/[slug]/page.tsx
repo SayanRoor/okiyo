@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ProductCard } from "@/components/product-card";
+import { CollectionGrid } from "@/components/collection-grid";
 import { payload } from "@/lib/payload";
 
 export const dynamic = "force-dynamic";
@@ -27,13 +27,8 @@ export async function generateMetadata({ params }: Params) {
   };
 }
 
-export default async function CategoryPage({
-  params,
-  searchParams,
-}: Params) {
+export default async function CategoryPage({ params }: Params) {
   const { slug } = await params;
-  const sp = await searchParams;
-  const page = Math.max(1, Number(sp.page ?? 1));
 
   const p = await payload();
   const catRes = await p.find({
@@ -52,47 +47,69 @@ export default async function CategoryPage({
         { category: { equals: category.id } },
       ],
     },
-    page,
-    limit: 24,
-    sort: "-createdAt",
+    limit: 200,
+    sort: ["order", "-createdAt"],
     depth: 2,
   });
 
   return (
-    <div className="container-x py-10 md:py-14">
-      <nav className="text-sm text-(--muted) mb-6 flex gap-1.5">
-        <Link href="/" className="hover:text-(--accent)">
+    <div className="container-x py-12 md:py-20">
+      <nav
+        className="text-sm mb-8 flex gap-1.5"
+        style={{ color: "var(--muted)" }}
+      >
+        <Link href="/" className="hover:opacity-60 transition-opacity">
           Главная
         </Link>
         <span>/</span>
-        <Link href="/catalog" className="hover:text-(--accent)">
+        <Link href="/catalog" className="hover:opacity-60 transition-opacity">
           Каталог
         </Link>
         <span>/</span>
-        <span className="text-(--primary)">{category.title}</span>
+        <span style={{ color: "var(--ink)" }}>{category.title}</span>
       </nav>
 
-      <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-(--primary)">
-        {category.title}
-      </h1>
-      {category.description ? (
-        <p className="mt-3 text-(--muted) max-w-2xl">{category.description}</p>
-      ) : null}
-      <p className="mt-2 text-sm text-(--muted)">
-        {products.totalDocs} товаров
-      </p>
-
-      {products.docs.length > 0 ? (
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {products.docs.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
+      <header className="mb-10">
+        <div className="eyebrow mb-3">
+          {products.totalDocs} {pluralRu(products.totalDocs, ["модель", "модели", "моделей"])}
         </div>
-      ) : (
-        <p className="mt-12 text-(--muted)">
-          В этой категории пока нет товаров.
-        </p>
-      )}
+        <h1
+          style={{
+            fontFamily: "var(--font-serif), serif",
+            fontWeight: 300,
+            fontSize: "clamp(36px, 5vw, 64px)",
+            lineHeight: 1,
+            letterSpacing: "-0.01em",
+            color: "var(--ink)",
+          }}
+        >
+          {category.title}
+        </h1>
+        {category.description ? (
+          <p
+            className="mt-4 max-w-2xl"
+            style={{ color: "var(--muted)", lineHeight: 1.7, fontSize: 14 }}
+          >
+            {category.description}
+          </p>
+        ) : null}
+      </header>
+
+      <CollectionGrid
+        products={products.docs}
+        initialVisible={12}
+        step={8}
+        showFilters={false}
+      />
     </div>
   );
+}
+
+function pluralRu(n: number, forms: [string, string, string]) {
+  const abs = Math.abs(n) % 100;
+  const n1 = abs % 10;
+  if (abs > 10 && abs < 20) return forms[2];
+  if (n1 > 1 && n1 < 5) return forms[1];
+  if (n1 === 1) return forms[0];
+  return forms[2];
 }

@@ -1,8 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { LeadForm } from "@/components/lead-form";
-import { ProductCard } from "@/components/product-card";
+import { CollectionGrid } from "@/components/collection-grid";
 import { mediaAlt, mediaUrl } from "@/lib/format";
 import { payload } from "@/lib/payload";
 
@@ -10,157 +9,206 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const p = await payload();
-  const [settings, featured, categories] = await Promise.all([
+  const [settings, collection] = await Promise.all([
     p.findGlobal({ slug: "settings" }),
     p.find({
       collection: "products",
-      where: {
-        and: [
-          { isPublished: { equals: true } },
-          { isFeatured: { equals: true } },
-        ],
-      },
-      limit: 8,
-      sort: "-createdAt",
+      where: { isPublished: { equals: true } },
+      limit: 24,
+      sort: ["order", "-createdAt"],
       depth: 2,
     }),
-    p.find({ collection: "categories", sort: "order", limit: 12, depth: 1 }),
   ]);
 
   const heroBg = mediaUrl(settings.heroImage, "hero");
   const heroAlt = mediaAlt(settings.heroImage);
+  const heroEyebrow = settings.heroEyebrow || "Spring Collection — 2026";
+  const heroTitle = settings.heroTitle || "Тише линий — ярче взгляд.";
+  const heroSubtitle =
+    settings.heroSubtitle ||
+    "OKIYO — японские очки с минималистичным силуэтом. Лёгкий ацетат, поляризация UV400, бессрочная гарантия каркаса.";
+  const heroCtaLabel = settings.heroCtaLabel || "Смотреть коллекцию";
+  const heroCtaHref = settings.heroCtaHref || "/catalog";
+
+  // Заголовок может содержать «—» как разделитель, выделяем хвост курсивом.
+  const renderTitle = renderItalicTail(heroTitle);
+
+  const trust =
+    (settings.trustBadges as { id?: string | null; text: string }[] | undefined) ??
+    [];
 
   return (
     <>
-      <section className="relative bg-(--primary) text-white overflow-hidden">
-        {heroBg ? (
-          <Image
-            src={heroBg}
-            alt={heroAlt}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-50"
-          />
-        ) : null}
-        <div className="container-x relative py-20 md:py-32 max-w-3xl">
-          {settings.heroEyebrow ? (
-            <div className="text-xs uppercase tracking-[0.2em] text-(--accent) mb-4">
-              {settings.heroEyebrow}
-            </div>
-          ) : null}
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight whitespace-pre-line">
-            {settings.heroTitle || "Тише линий — ярче взгляд."}
-          </h1>
-          {settings.heroSubtitle ? (
-            <p className="mt-5 text-lg md:text-xl text-white/85 max-w-xl">
-              {settings.heroSubtitle}
-            </p>
-          ) : null}
-          <Link
-            href={settings.heroCtaHref || "/catalog"}
-            className="mt-8 inline-flex items-center rounded-md bg-(--accent) text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
+      {/* HERO */}
+      <section className="container-x okiyo-hero py-16 md:py-24">
+        <div className="min-w-0">
+          <div className="eyebrow mb-7">{heroEyebrow}</div>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif), serif",
+              fontWeight: 300,
+              lineHeight: 0.95,
+              letterSpacing: "-0.02em",
+              fontSize: "clamp(56px, 8vw, 108px)",
+              color: "var(--ink)",
+            }}
           >
-            {settings.heroCtaLabel || "Смотреть коллекцию"}
-          </Link>
-          {settings.trustBadges && settings.trustBadges.length > 0 ? (
-            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/75">
-              {settings.trustBadges.map(
-                (b: { id?: string | null; text: string }, i: number) => (
-                  <li key={b.id ?? i} className="flex items-center gap-2">
-                    <span className="inline-block w-1 h-1 rounded-full bg-(--accent)" />
-                    {b.text}
-                  </li>
-                ),
-              )}
-            </ul>
-          ) : null}
+            {renderTitle}
+          </h1>
+          <p
+            className="mt-9"
+            style={{
+              maxWidth: 380,
+              color: "var(--muted)",
+              fontSize: 14,
+              lineHeight: 1.7,
+            }}
+          >
+            {heroSubtitle}
+          </p>
+          <div className="mt-10 flex gap-3 flex-wrap">
+            <Link href={heroCtaHref} className="btn btn-primary">
+              {heroCtaLabel} →
+            </Link>
+            <Link href="/contacts" className="btn btn-ghost">
+              Записаться на примерку
+            </Link>
+          </div>
+        </div>
+
+        <div className="hero-visual">
+          {heroBg ? (
+            <Image
+              src={heroBg}
+              alt={heroAlt || "OKIYO"}
+              fill
+              priority
+              sizes="(min-width:1100px) 40vw, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            <svg
+              viewBox="0 0 400 160"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              style={{ width: "62%", color: "var(--ink)" }}
+            >
+              <rect x="32" y="52" width="126" height="56" rx="8" fill="currentColor" opacity=".9" />
+              <rect x="242" y="52" width="126" height="56" rx="8" fill="currentColor" opacity=".9" />
+              <path d="M158 70 Q200 55 242 70" />
+              <path d="M32 60 L10 50 M368 60 L390 50" />
+            </svg>
+          )}
+          <div className="seal">— OKIYO · Kūki —</div>
         </div>
       </section>
 
-      {categories.docs.length > 0 ? (
-        <section className="py-16">
-          <div className="container-x">
-            <div className="flex items-end justify-between mb-8">
-              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-(--primary)">
-                Категории
-              </h2>
-              <Link
-                href="/catalog"
-                className="text-sm text-(--muted) hover:text-(--accent)"
-              >
-                Все товары →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {categories.docs.map((c) => {
-                const img = mediaUrl(c.image, "card");
-                return (
-                  <Link
-                    key={c.id}
-                    href={`/categories/${c.slug}`}
-                    className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-(--border) bg-(--card)"
-                  >
-                    {img ? (
-                      <Image
-                        src={img}
-                        alt={c.title}
-                        fill
-                        sizes="(min-width:1024px) 25vw, 50vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : null}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                      <div className="text-base md:text-lg font-medium">
-                        {c.title}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {featured.docs.length > 0 ? (
-        <section className="py-16 bg-white/40">
-          <div className="container-x">
-            <div className="flex items-end justify-between mb-8">
-              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-(--primary)">
-                Подборка
-              </h2>
-              <Link
-                href="/catalog"
-                className="text-sm text-(--muted) hover:text-(--accent)"
-              >
-                Весь каталог →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {featured.docs.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      <section className="py-16">
-        <div className="container-x grid md:grid-cols-2 gap-10 items-start">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-(--primary)">
-              Не нашли свою оправу?
-            </h2>
-            <p className="mt-3 text-(--muted) max-w-md">
-              Оставьте заявку — менеджер свяжется, поможет с подбором формы
-              и привезёт на примерку по Алматы.
-            </p>
-          </div>
-          <LeadForm />
+      {/* STRIP — преимущества */}
+      <div className="container-x">
+        <div className="feature-strip">
+          {(trust.length > 0
+            ? trust.map((t) => t.text)
+            : [
+                "Поляризация UV400",
+                "Доставка по Алматы — 2 ч",
+                "Оплата счётом или Kaspi QR",
+              ]
+          )
+            .slice(0, 3)
+            .map((t, i) => (
+              <div className="item" key={i}>
+                <FeatureIcon i={i} />
+                <span>{t}</span>
+              </div>
+            ))}
         </div>
+      </div>
+
+      {/* COLLECTION */}
+      <section className="container-x py-20 md:py-24" id="collection">
+        <div className="flex justify-between items-end mb-10 flex-wrap gap-4">
+          <div>
+            <div className="eyebrow mb-3">Новое · 2026</div>
+            <h2
+              style={{
+                fontFamily: "var(--font-serif), serif",
+                fontWeight: 300,
+                fontSize: "clamp(36px, 5vw, 64px)",
+                lineHeight: 1,
+                letterSpacing: "-0.01em",
+                color: "var(--ink)",
+              }}
+            >
+              Коллекция
+            </h2>
+          </div>
+          <Link
+            href="/catalog"
+            className="pb-1 border-b transition-colors"
+            style={{
+              fontSize: 12,
+              color: "var(--muted)",
+              borderColor: "var(--line)",
+            }}
+          >
+            Смотреть все →
+          </Link>
+        </div>
+
+        <CollectionGrid products={collection.docs} />
       </section>
     </>
+  );
+}
+
+/**
+ * Если в заголовке есть «—», то всё после него — italic-акцент.
+ * Так в эталоне: «Тише линий — <em>ярче взгляд.</em>»
+ */
+function renderItalicTail(s: string) {
+  const idx = s.indexOf("—");
+  if (idx < 0) return s;
+  const head = s.slice(0, idx + 1);
+  const tail = s.slice(idx + 1);
+  return (
+    <>
+      {head}
+      <br />
+      <em style={{ fontStyle: "italic", fontWeight: 400 }}>{tail.trim()}</em>
+    </>
+  );
+}
+
+function FeatureIcon({ i }: { i: number }) {
+  const props = {
+    width: 14,
+    height: 14,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.4,
+    style: { stroke: "var(--muted)", flexShrink: 0 } as const,
+  };
+  if (i === 0)
+    return (
+      <svg {...props}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+      </svg>
+    );
+  if (i === 1)
+    return (
+      <svg {...props}>
+        <path d="M3 7h13l5 5v5h-3" />
+        <circle cx="7" cy="17" r="2" />
+        <circle cx="17" cy="17" r="2" />
+      </svg>
+    );
+  return (
+    <svg {...props}>
+      <rect x="3" y="6" width="18" height="13" rx="2" />
+      <path d="M3 10h18" />
+    </svg>
   );
 }

@@ -47,115 +47,233 @@ export default async function ProductPage({ params }: Params) {
     limit: 1,
     depth: 2,
   });
-  const product = result.docs[0];
-  if (!product) notFound();
+  const productRaw = result.docs[0];
+  if (!productRaw) notFound();
 
-  const category =
-    typeof product.category === "object" && product.category
-      ? product.category
+  // Локальный супертип — учитывает поля, добавленные в схему
+  // (после `pnpm payload generate:types` они появятся в payload-types.ts).
+  const product = productRaw as typeof productRaw & {
+    subtitle?: string | null;
+    type?: "sun" | "optic" | null;
+    badge?: string | null;
+    colors?: { hex: string; name?: string | null }[] | null;
+  };
+
+  const settings = await p.findGlobal({ slug: "settings" });
+  const whatsapp = settings.whatsapp
+    ? settings.whatsapp.replace(/[^\d]/g, "")
+    : null;
+
+  const typeLabel =
+    product.type === "optic" ? "Оптические" : "Солнцезащитные";
+
+  // Список похожих — приоритетно по type, иначе по category.
+  const relatedWhere = product.type
+    ? { type: { equals: product.type } }
+    : product.category
+      ? {
+          category: {
+            equals:
+              typeof product.category === "object"
+                ? product.category.id
+                : product.category,
+          },
+        }
       : null;
 
-  const related = category
+  const related = relatedWhere
     ? await p.find({
         collection: "products",
         where: {
           and: [
             { isPublished: { equals: true } },
             { id: { not_equals: product.id } },
-            {
-              category: {
-                equals:
-                  typeof product.category === "object"
-                    ? product.category.id
-                    : product.category,
-              },
-            },
+            relatedWhere,
           ],
         },
         limit: 4,
-        sort: "-createdAt",
+        sort: ["order", "-createdAt"],
         depth: 2,
       })
     : null;
 
+  const waText = encodeURIComponent(
+    `Здравствуйте! Интересует модель ${product.title} (${formatPrice(product.price)}).`,
+  );
+
   return (
-    <div className="container-x py-10 md:py-14">
-      <nav className="text-sm text-(--muted) mb-6 flex flex-wrap gap-1.5">
-        <Link href="/" className="hover:text-(--accent)">
+    <div className="container-x py-10 md:py-16">
+      <nav
+        className="text-sm mb-8 flex flex-wrap gap-1.5"
+        style={{ color: "var(--muted)" }}
+      >
+        <Link href="/" className="hover:opacity-60 transition-opacity">
           Главная
         </Link>
         <span>/</span>
-        <Link href="/catalog" className="hover:text-(--accent)">
+        <Link href="/catalog" className="hover:opacity-60 transition-opacity">
           Каталог
         </Link>
-        {category ? (
-          <>
-            <span>/</span>
-            <Link
-              href={`/categories/${category.slug}`}
-              className="hover:text-(--accent)"
-            >
-              {category.title}
-            </Link>
-          </>
-        ) : null}
         <span>/</span>
-        <span className="text-(--primary)">{product.title}</span>
+        <span style={{ color: "var(--ink)" }}>{product.title}</span>
       </nav>
 
-      <div className="grid lg:grid-cols-2 gap-10">
+      <div className="okiyo-product-grid">
+        {/* Галерея с миниатюрами и кликом по цветам */}
         <ProductGallery
           productTitle={product.title}
           mainImage={product.mainImage}
           gallery={product.gallery}
-          colors={product.colors}
+          colors={
+            product.colors as
+              | {
+                  id?: string | null;
+                  name: string;
+                  hex: string;
+                  stock?: number | null;
+                  image?: unknown;
+                }[]
+              | null
+              | undefined
+          }
         />
 
+        {/* Инфо-колонка */}
         <div>
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-(--primary)">
+          <div className="eyebrow mb-3">{typeLabel}</div>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif), serif",
+              fontWeight: 300,
+              fontSize: "clamp(36px, 4.4vw, 56px)",
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
+              color: "var(--ink)",
+            }}
+          >
             {product.title}
           </h1>
+          {product.subtitle ? (
+            <div
+              className="mt-2"
+              style={{
+                fontSize: 12,
+                color: "var(--muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.18em",
+              }}
+            >
+              {product.subtitle}
+            </div>
+          ) : null}
 
-          <div className="mt-4 flex items-baseline gap-3">
-            <span className="text-3xl font-semibold text-(--primary)">
+          <div className="mt-6 flex items-baseline gap-3">
+            <span
+              style={{
+                fontFamily: "var(--font-serif), serif",
+                fontSize: 28,
+                fontWeight: 400,
+                color: "var(--ink)",
+              }}
+            >
               {formatPrice(product.price)}
             </span>
             {product.oldPrice && product.oldPrice > product.price ? (
-              <span className="text-lg text-(--muted) line-through">
+              <span
+                style={{
+                  fontSize: 16,
+                  color: "var(--muted)",
+                  textDecoration: "line-through",
+                }}
+              >
                 {formatPrice(product.oldPrice)}
               </span>
             ) : null}
           </div>
 
-          {product.sku ? (
-            <div className="mt-2 text-sm text-(--muted)">
-              Артикул: {product.sku}
-            </div>
-          ) : null}
+          {/* Цветовые swatch'и теперь живут в <ProductGallery>, чтобы клик по ним менял главное фото. */}
 
           {product.shortDescription ? (
-            <p className="mt-6 text-(--muted)">{product.shortDescription}</p>
+            <p
+              className="mt-7"
+              style={{ color: "var(--muted)", lineHeight: 1.7, fontSize: 14 }}
+            >
+              {product.shortDescription}
+            </p>
           ) : null}
 
           {product.specifications && product.specifications.length > 0 ? (
-            <dl className="mt-8 divide-y divide-(--border) border-y border-(--border)">
+            <dl
+              className="mt-8 border-y"
+              style={{ borderColor: "var(--line)" }}
+            >
               {product.specifications.map(
                 (s: { name: string; value: string }, i: number) => (
-                  <div key={i} className="grid grid-cols-2 py-2.5 text-sm">
-                    <dt className="text-(--muted)">{s.name}</dt>
-                    <dd className="text-(--primary)">{s.value}</dd>
+                  <div
+                    key={i}
+                    className="grid grid-cols-2 py-3"
+                    style={{
+                      borderBottom:
+                        i < product.specifications!.length - 1
+                          ? "1px solid var(--line)"
+                          : undefined,
+                      fontSize: 13,
+                    }}
+                  >
+                    <dt style={{ color: "var(--muted)" }}>{s.name}</dt>
+                    <dd style={{ color: "var(--ink)" }}>{s.value}</dd>
                   </div>
                 ),
               )}
             </dl>
           ) : null}
 
-          <div className="mt-8 rounded-xl border border-(--border) bg-(--card) p-6">
-            <div className="text-lg font-medium text-(--primary)">
-              Заказать или уточнить наличие
+          <div className="mt-10 flex flex-wrap gap-3">
+            {whatsapp ? (
+              <a
+                className="btn btn-primary"
+                href={`https://wa.me/${whatsapp}?text=${waText}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Заказать ${product.title} в WhatsApp`}
+                style={{
+                  opacity: product.inStock === false ? 0.55 : 1,
+                  pointerEvents: product.inStock === false ? "none" : "auto",
+                }}
+              >
+                {product.inStock === false
+                  ? "Нет в наличии"
+                  : "Заказать в WhatsApp"}
+              </a>
+            ) : null}
+            <a className="btn btn-ghost" href="#lead-form">
+              Перезвоните мне
+            </a>
+          </div>
+
+          <div
+            id="lead-form"
+            className="mt-10 p-6 scroll-mt-24"
+            style={{
+              border: "1px solid var(--line)",
+              background: "var(--card)",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "var(--font-serif), serif",
+                fontSize: 20,
+                fontWeight: 400,
+                color: "var(--ink)",
+              }}
+            >
+              Уточнить наличие
             </div>
-            <p className="text-sm text-(--muted) mt-1 mb-4">
-              Менеджер перезвонит, расскажет про доставку и сборку.
+            <p
+              className="mt-1.5 mb-4"
+              style={{ fontSize: 13, color: "var(--muted)" }}
+            >
+              Менеджер перезвонит, расскажет про доставку и примерку.
             </p>
             <LeadForm productId={product.id} />
           </div>
@@ -163,22 +281,34 @@ export default async function ProductPage({ params }: Params) {
       </div>
 
       {product.description ? (
-        <section className="mt-14 max-w-3xl">
-          <h2 className="text-xl font-semibold text-(--primary) mb-4">
-            Описание
-          </h2>
-          <div className="prose prose-neutral max-w-none">
+        <section className="mt-16 max-w-3xl">
+          <div className="eyebrow mb-4">Описание</div>
+          <div
+            className="prose prose-neutral max-w-none"
+            style={{ color: "var(--ink)", fontSize: 15, lineHeight: 1.8 }}
+          >
             <RichText data={product.description} />
           </div>
         </section>
       ) : null}
 
       {related && related.docs.length > 0 ? (
-        <section className="mt-16">
-          <h2 className="text-2xl font-semibold tracking-tight text-(--primary) mb-6">
-            Похожие товары
+        <section className="mt-20">
+          <div className="eyebrow mb-3">Похожие модели</div>
+          <h2
+            className="mb-8"
+            style={{
+              fontFamily: "var(--font-serif), serif",
+              fontWeight: 300,
+              fontSize: "clamp(28px, 3.4vw, 44px)",
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
+              color: "var(--ink)",
+            }}
+          >
+            Ещё из коллекции
           </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="okiyo-grid">
             {related.docs.map((r) => (
               <ProductCard key={r.id} product={r} />
             ))}

@@ -134,6 +134,10 @@ async function main() {
       heroCtaLabel: siteConfig.hero.primaryCtaLabel,
       heroCtaHref: siteConfig.hero.primaryCtaHref,
       trustBadges: siteConfig.hero.trust.map((text) => ({ text })),
+      topbar: [
+        { text: "Бесплатная доставка по Алматы" },
+        { text: "Привезём за 2 часа" },
+      ],
       metaTitle: "OKIYO — японские очки",
       metaDescription: siteConfig.hero.description,
     },
@@ -267,11 +271,22 @@ async function main() {
     if (!categoryId) {
       throw new Error(`no category for shape ${p.shape}`);
     }
+    // Маппинг под новые поля редизайна
+    // - subtitle: «Acetate · {имя первого цвета}» если есть варианты
+    // - colors:   полный объект с stock/image (через buildColors)
+    // - badge:    NEW для isNew, иначе none
+    // - type:     sun по умолчанию (можно переопределить в админке)
+    const firstColor = p.variants?.[0]?.name;
+    const subtitle = firstColor ? `Acetate · ${firstColor}` : undefined;
+
     await payload.create({
       collection: "products",
       data: {
         title: p.name,
         slug: p.slug,
+        subtitle,
+        type: "sun",
+        badge: p.isNew ? "new" : "none",
         category: categoryId,
         price: p.price,
         shortDescription: p.description,

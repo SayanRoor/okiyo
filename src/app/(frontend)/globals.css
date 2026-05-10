@@ -1,43 +1,349 @@
 @import "tailwindcss";
 
-:root {
-  --background: #faf7f2;
-  --foreground: #1c1917;
-  --muted: #6b6358;
-  --primary: #2a221a;
-  --accent: #8a7350;
-  --border: #e7e0d4;
-  --card: #ffffff;
+/*
+ * OKIYO — палитра и темы.
+ * --bg / --ink / --muted / --line / --card — основная цветовая система.
+ * Тема переключается через data-theme="day" | "night" на <html>.
+ * Дефолт — день; ночь подключается через data-атрибут, чтобы не было FOUC.
+ */
+:root,
+html[data-theme="day"] {
+  --bg: #f4f1ec;
+  --ink: #1a1a1a;
+  /* WCAG AA: контраст 4.6:1 на --bg (#f4f1ec) */
+  --muted: #6b6760;
+  --line: #d9d3ca;
+  --card: #ece7df;
+}
+
+html[data-theme="night"] {
+  --bg: #0e0e0e;
+  --ink: #ece7df;
+  /* WCAG AA: контраст 6.4:1 на --bg (#0e0e0e) */
+  --muted: #8e8a84;
+  --line: #272421;
+  --card: #161513;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
   --color-muted: var(--muted);
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
-  --color-border: var(--border);
+  --color-line: var(--line);
   --color-card: var(--card);
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-serif), serif;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background 0.5s ease,
+    color 0.5s ease;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* Контейнер 1440 max — как в эталоне */
 .container-x {
   width: 100%;
+  max-width: 1440px;
   margin-inline: auto;
-  padding-inline: 1rem;
-  max-width: 1280px;
+  padding-inline: 24px;
 }
 
 @media (min-width: 768px) {
   .container-x {
-    padding-inline: 2rem;
+    padding-inline: 48px;
+  }
+}
+
+/* Базовые типографические утилиты */
+.font-serif {
+  font-family: var(--font-serif), serif;
+}
+.font-sans {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Eyebrow — мелкий капсовый текст с трекингом */
+.eyebrow {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+
+/* Универсальная кнопка */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 26px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-ghost:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* Иконочная кнопка */
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+  color: var(--ink);
+  background: transparent;
+}
+
+.icon-btn:hover {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+/* Чип-фильтр */
+.chip {
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+  background: transparent;
+  font-family: inherit;
+  min-height: 36px;
+}
+
+.chip:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.chip[data-active="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+/* Hover-карточки */
+.card-hover {
+  transition: transform 0.5s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+}
+
+/* Тонкие линии-разделители */
+.hairline {
+  border-top: 1px solid var(--line);
+}
+
+/* Скрытие визуальных скроллбаров в горизонтальных скроллах */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* OKIYO grid — 2 колонки на мобиле, 4 на широком экране */
+.okiyo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px 24px;
+}
+
+@media (min-width: 1100px) {
+  .okiyo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Hero — на мобиле колонкой, на десктопе 2 колонки */
+.okiyo-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .okiyo-hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 80px;
+  }
+}
+
+/* Hero-визуал блок (квадрат с акцентом) */
+.hero-visual {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--card);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-visual .seal {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  font-family: var(--font-serif), serif;
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  color: var(--muted);
+}
+
+/* Полоска преимуществ */
+.feature-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.feature-strip > .item {
+  padding: 22px 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  border-right: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.feature-strip > .item:last-child {
+  border-right: none;
+}
+
+@media (max-width: 720px) {
+  .feature-strip {
+    grid-template-columns: 1fr;
+  }
+  .feature-strip > .item {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .feature-strip > .item:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Product page grid (галерея | инфо) */
+.okiyo-product-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+@media (min-width: 1024px) {
+  .okiyo-product-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: start;
+  }
+}
+
+/* Contacts page grid */
+.okiyo-contacts-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+@media (min-width: 1024px) {
+  .okiyo-contacts-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 64px;
+    align-items: start;
+  }
+}
+
+/* Footer grid */
+.okiyo-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+}
+
+@media (min-width: 640px) {
+  .okiyo-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .okiyo-footer-grid {
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    gap: 48px;
   }
 }

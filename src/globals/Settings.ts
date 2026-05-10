@@ -23,6 +23,17 @@ export const Settings: GlobalConfig = {
               },
             },
             { name: "tagline", type: "text", label: "Подзаголовок (под логотипом)" },
+            {
+              name: "topbar",
+              type: "array",
+              label: "Топ-бар (тонкая полоска над шапкой)",
+              maxRows: 4,
+              admin: {
+                description:
+                  "До 4 фраз, разделяются точкой. Например: Бесплатная доставка по Алматы · Привезём за 2 часа",
+              },
+              fields: [{ name: "text", type: "text", required: true }],
+            },
           ],
         },
         {

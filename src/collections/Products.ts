@@ -4,8 +4,8 @@ export const Products: CollectionConfig = {
   slug: "products",
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "category", "price", "isFeatured", "isPublished"],
-    listSearchableFields: ["title", "sku"],
+    defaultColumns: ["title", "type", "price", "badge", "isPublished"],
+    listSearchableFields: ["title", "sku", "subtitle"],
   },
   access: {
     read: () => true,
@@ -21,7 +21,8 @@ export const Products: CollectionConfig = {
               name: "title",
               type: "text",
               required: true,
-              label: "Название",
+              label: "Название модели",
+              admin: { description: "Например, Kūki 01" },
             },
             {
               name: "slug",
@@ -30,15 +31,39 @@ export const Products: CollectionConfig = {
               unique: true,
               index: true,
               admin: {
-                description: "URL вида /catalog/диван/{slug}",
+                description: "URL вида /catalog/{slug}",
+              },
+            },
+            {
+              name: "subtitle",
+              type: "text",
+              label: "Подпись (материал · цвет)",
+              admin: {
+                description: "Например: Acetate · Black, Titanium · Silver",
+              },
+            },
+            {
+              name: "type",
+              type: "select",
+              label: "Тип",
+              defaultValue: "sun",
+              options: [
+                { label: "Солнцезащитные", value: "sun" },
+                { label: "Оптические", value: "optic" },
+              ],
+              admin: {
+                description: "Используется для фильтра в каталоге",
               },
             },
             {
               name: "category",
               type: "relationship",
               relationTo: "categories",
-              required: true,
-              admin: { allowCreate: true },
+              admin: {
+                allowCreate: true,
+                description:
+                  "Дополнительная категория. Не обязательна — фильтр на сайте по полю «Тип».",
+              },
             },
             {
               name: "price",
@@ -57,9 +82,24 @@ export const Products: CollectionConfig = {
               },
             },
             {
+              name: "badge",
+              type: "select",
+              label: "Метка",
+              options: [
+                { label: "Без метки", value: "none" },
+                { label: "NEW IN", value: "new" },
+                { label: "BESTSELLER", value: "bestseller" },
+                { label: "LIMITED", value: "limited" },
+              ],
+              defaultValue: "none",
+              admin: {
+                description: "Маленькая метка в углу карточки",
+              },
+            },
+            {
               name: "shortDescription",
               type: "textarea",
-              label: "Краткое описание (для карточки)",
+              label: "Краткое описание (для карточки/SEO)",
               maxLength: 200,
             },
             {
@@ -103,16 +143,22 @@ export const Products: CollectionConfig = {
               label: "Цветовые варианты",
               admin: {
                 description:
-                  "Если у варианта своё фото — при клике на свотч на странице товара главное фото поменяется.",
+                  "Каждая запись — один цвет. Если у варианта есть своё фото, при клике на свотч на странице товара главное фото меняется.",
               },
               fields: [
-                { name: "name", type: "text", required: true, label: "Название" },
+                {
+                  name: "name",
+                  type: "text",
+                  required: true,
+                  label: "Название",
+                  admin: { placeholder: "Black" },
+                },
                 {
                   name: "hex",
                   type: "text",
                   required: true,
                   label: "HEX",
-                  admin: { description: "Например #0B0B0B" },
+                  admin: { placeholder: "#0B0B0B" },
                 },
                 {
                   name: "stock",
@@ -170,6 +216,15 @@ export const Products: CollectionConfig = {
               type: "checkbox",
               defaultValue: false,
               label: "Показать на главной",
+            },
+            {
+              name: "order",
+              type: "number",
+              defaultValue: 0,
+              label: "Порядок сортировки",
+              admin: {
+                description: "Меньше — выше. Используется для drag-n-drop позднее.",
+              },
             },
           ],
         },
