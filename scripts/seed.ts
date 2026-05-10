@@ -202,26 +202,67 @@ async function main() {
   }
 
   // ---- Products ----------------------------------------------------------
-  for (const p of products) {
-    const existing = await payload.find({
-      collection: "products",
-      where: { slug: { equals: p.slug } },
-      limit: 1,
-    });
-    if (existing.docs[0]) {
-      console.log(`[seed] product exists: ${p.slug}`);
-      continue;
+  async function buildColors(
+    p: SeedProduct,
+  ): Promise<Array<{ name: string; hex: string; stock?: number; image?: number }>> {
+    const out: Array<{ name: string; hex: string; stock?: number; image?: number }> = [];
+    for (const v of p.variants ?? []) {
+      const entry: { name: string; hex: string; stock?: number; image?: number } = {
+        name: v.name,
+        hex: v.hex,
+      };
+      if (typeof v.stock === "number") entry.stock = v.stock;
+      if (v.image) entry.image = await ensureMedia(v.image, `${p.name} — ${v.name}`);
+      out.push(entry);
     }
+    return out;
+  }
+
+  for (const p of products) {
     if (p.images.length === 0) {
       console.warn(`[seed] product ${p.slug} has no images, skipping`);
       continue;
     }
+    const existing = await payload.find({
+      collection: "products",
+      where: { slug: { equals: p.slug } },
+      limit: 1,
+      depth: 0,
+    });
+
+    if (existing.docs[0]) {
+      const cur = existing.docs[0];
+      const hasColors = Array.isArray(cur.colors) && cur.colors.length > 0;
+      if (hasColors) {
+        console.log(`[seed] product exists with colors: ${p.slug}`);
+        continue;
+      }
+      console.log(`[seed] backfilling colors for: ${p.slug}`);
+      const colors = await buildColors(p);
+      // also clean stale "Цвет — *" rows from specifications
+      const specs = (cur.specifications ?? []).filter(
+        (s: { name?: string | null }) =>
+          !(s.name ?? "").toLowerCase().startsWith("цвет —"),
+      );
+      await payload.update({
+        collection: "products",
+        id: cur.id,
+        data: {
+          colors,
+          specifications: specs,
+        },
+      });
+      console.log(`[seed]   updated ${p.slug} with ${colors.length} colors`);
+      continue;
+    }
+
     console.log(`[seed] uploading product: ${p.name}`);
     const mainId = await ensureMedia(p.images[0], `${p.name} — главное фото`);
     const gallery: { image: number }[] = [];
     for (const img of p.images.slice(1)) {
       gallery.push({ image: await ensureMedia(img, `${p.name} — галерея`) });
     }
+    const colors = await buildColors(p);
     const categoryId = categoryIdByShape.get(p.shape);
     if (!categoryId) {
       throw new Error(`no category for shape ${p.shape}`);
@@ -237,13 +278,10 @@ async function main() {
         sku: p.id.toUpperCase(),
         mainImage: mainId,
         gallery,
+        colors,
         isPublished: true,
         isFeatured: Boolean(p.isNew),
         inStock: (p.variants ?? []).reduce((s, v) => s + (v.stock ?? 0), 0) > 0,
-        specifications: (p.variants ?? []).map((v) => ({
-          name: `Цвет — ${v.name}`,
-          value: `${v.hex}${typeof v.stock === "number" ? ` · ${v.stock} шт` : ""}`,
-        })),
       },
     });
     console.log(`[seed]   created product ${p.slug}`);

@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
-import { formatPrice, mediaAlt, mediaUrl } from "@/lib/format";
+import { ProductGallery } from "@/components/product-gallery";
+import { formatPrice } from "@/lib/format";
 import { payload } from "@/lib/payload";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 
@@ -49,18 +49,6 @@ export default async function ProductPage({ params }: Params) {
   });
   const product = result.docs[0];
   if (!product) notFound();
-
-  const main = mediaUrl(product.mainImage, "hero");
-  const mainAlt = mediaAlt(product.mainImage) || product.title;
-  type GalleryItem = { url: string | null; alt: string };
-  const gallery: GalleryItem[] = (product.gallery ?? [])
-    .map((g: { image?: unknown }) => ({
-      url: mediaUrl(g.image, "card"),
-      alt: mediaAlt(g.image),
-    }))
-    .filter((g: GalleryItem): g is GalleryItem & { url: string } =>
-      Boolean(g.url),
-    );
 
   const category =
     typeof product.category === "object" && product.category
@@ -116,40 +104,12 @@ export default async function ProductPage({ params }: Params) {
       </nav>
 
       <div className="grid lg:grid-cols-2 gap-10">
-        <div>
-          {main ? (
-            <div className="relative aspect-square rounded-xl overflow-hidden border border-(--border) bg-(--card)">
-              <Image
-                src={main}
-                alt={mainAlt}
-                fill
-                priority
-                sizes="(min-width:1024px) 50vw, 100vw"
-                className="object-cover"
-              />
-            </div>
-          ) : null}
-          {gallery.length > 0 ? (
-            <div className="mt-4 grid grid-cols-4 gap-3">
-              {gallery.map((g: GalleryItem, idx: number) => (
-                <div
-                  key={idx}
-                  className="relative aspect-square rounded-lg overflow-hidden border border-(--border) bg-(--card)"
-                >
-                  {g.url ? (
-                    <Image
-                      src={g.url}
-                      alt={g.alt}
-                      fill
-                      sizes="20vw"
-                      className="object-cover"
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        <ProductGallery
+          productTitle={product.title}
+          mainImage={product.mainImage}
+          gallery={product.gallery}
+          colors={product.colors}
+        />
 
         <div>
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-(--primary)">

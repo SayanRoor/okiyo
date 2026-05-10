@@ -95,6 +95,42 @@ export const Products: CollectionConfig = {
           ],
         },
         {
+          label: "Цвета",
+          fields: [
+            {
+              name: "colors",
+              type: "array",
+              label: "Цветовые варианты",
+              admin: {
+                description:
+                  "Если у варианта своё фото — при клике на свотч на странице товара главное фото поменяется.",
+              },
+              fields: [
+                { name: "name", type: "text", required: true, label: "Название" },
+                {
+                  name: "hex",
+                  type: "text",
+                  required: true,
+                  label: "HEX",
+                  admin: { description: "Например #0B0B0B" },
+                },
+                {
+                  name: "stock",
+                  type: "number",
+                  min: 0,
+                  label: "В наличии (шт)",
+                },
+                {
+                  name: "image",
+                  type: "upload",
+                  relationTo: "media",
+                  label: "Фото варианта (опционально)",
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: "Характеристики",
           fields: [
             {

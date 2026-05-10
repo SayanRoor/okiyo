@@ -1,5 +1,6 @@
 import * as migration_20260509_232232_initial from './20260509_232232_initial';
 import * as migration_20260510_052735_settings_hero_extras from './20260510_052735_settings_hero_extras';
+import * as migration_20260510_090603_products_colors from './20260510_090603_products_colors';
 
 export const migrations = [
   {
@@ -10,6 +11,11 @@ export const migrations = [
   {
     up: migration_20260510_052735_settings_hero_extras.up,
     down: migration_20260510_052735_settings_hero_extras.down,
-    name: '20260510_052735_settings_hero_extras'
+    name: '20260510_052735_settings_hero_extras',
+  },
+  {
+    up: migration_20260510_090603_products_colors.up,
+    down: migration_20260510_090603_products_colors.down,
+    name: '20260510_090603_products_colors'
   },
 ];
