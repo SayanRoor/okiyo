@@ -66,7 +66,8 @@ export default async function ProductPage({ params }: Params) {
     product.type === "optic" ? "Оптические" : "Солнцезащитные";
 
   // Список похожих — приоритетно по type, иначе по category.
-  const relatedWhere = product.type
+  type RelatedFilter = { type: { equals: string } } | { category: { equals: number } };
+  const relatedWhere: RelatedFilter | null = product.type
     ? { type: { equals: product.type } }
     : product.category
       ? {
@@ -86,7 +87,7 @@ export default async function ProductPage({ params }: Params) {
           and: [
             { isPublished: { equals: true } },
             { id: { not_equals: product.id } },
-            relatedWhere,
+            relatedWhere as import("payload").Where,
           ],
         },
         limit: 4,
