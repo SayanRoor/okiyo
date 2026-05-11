@@ -87,20 +87,42 @@ export default async function HomePage() {
               className="object-cover"
             />
           ) : (
-            <svg
-              viewBox="0 0 400 160"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              style={{ width: "62%", color: "var(--ink)" }}
+            // Заглушка-брендмарк, пока не загружено фото модели в очках.
+            // Подсказка для админа: /admin → Настройки сайта → Главная → Фон для hero-секции.
+            <div
+              className="flex flex-col items-center justify-center text-center px-6"
+              style={{ width: "100%", height: "100%" }}
             >
-              <rect x="32" y="52" width="126" height="56" rx="8" fill="currentColor" opacity=".9" />
-              <rect x="242" y="52" width="126" height="56" rx="8" fill="currentColor" opacity=".9" />
-              <path d="M158 70 Q200 55 242 70" />
-              <path d="M32 60 L10 50 M368 60 L390 50" />
-            </svg>
+              <div
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontWeight: 300,
+                  fontSize: "clamp(48px, 7vw, 92px)",
+                  letterSpacing: "0.42em",
+                  color: "var(--ink)",
+                  paddingLeft: "0.42em",
+                  lineHeight: 1,
+                }}
+              >
+                O K I Y O
+              </div>
+              <div
+                className="mt-4"
+                style={{
+                  fontFamily: "var(--font-serif), serif",
+                  fontStyle: "italic",
+                  fontSize: 14,
+                  color: "var(--muted)",
+                  letterSpacing: "0.18em",
+                }}
+              >
+                Загрузите фото в админке
+              </div>
+            </div>
           )}
-          <div className="seal">— OKIYO · Kūki —</div>
+          {heroBg ? (
+            <div className="seal">— OKIYO · Kūki —</div>
+          ) : null}
         </div>
       </section>
 

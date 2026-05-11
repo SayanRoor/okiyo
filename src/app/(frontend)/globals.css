@@ -359,12 +359,17 @@ img {
 
 .hero-visual .seal {
   position: absolute;
-  right: 24px;
-  bottom: 24px;
-  font-family: var(--font-serif), serif;
-  font-size: 14px;
-  letter-spacing: 0.4em;
-  color: var(--muted);
+  right: 20px;
+  bottom: 20px;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 0.42em;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 14px 8px 18px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* Полоска преимуществ */

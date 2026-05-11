@@ -39,11 +39,13 @@ export function Footer({ settings }: { settings: Settings }) {
             <div
               className="mb-3.5"
               style={{
-                fontFamily: "var(--font-serif), serif",
-                fontWeight: 400,
-                fontSize: 22,
-                letterSpacing: "0.32em",
+                // Тот же стиль, что в шапке — фирменный «тиснёный» лого
+                fontFamily: "var(--font-sans), -apple-system, sans-serif",
+                fontWeight: 300,
+                fontSize: 28,
+                letterSpacing: "0.42em",
                 color: "var(--ink)",
+                paddingLeft: "0.42em",
               }}
             >
               {brandSpaced}
