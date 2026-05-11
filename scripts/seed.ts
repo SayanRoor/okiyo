@@ -236,14 +236,16 @@ async function main() {
 
     if (existing.docs[0]) {
       const cur = existing.docs[0];
-      const hasColors = Array.isArray(cur.colors) && cur.colors.length > 0;
-      if (hasColors) {
-        console.log(`[seed] product exists with colors: ${p.slug}`);
-        continue;
+      console.log(`[seed] updating product: ${p.slug}`);
+      const mainId = await ensureMedia(p.images[0], `${p.name} — главное фото`);
+      const gallery: { image: number }[] = [];
+      for (const img of p.images.slice(1)) {
+        gallery.push({ image: await ensureMedia(img, `${p.name} — галерея`) });
       }
-      console.log(`[seed] backfilling colors for: ${p.slug}`);
       const colors = await buildColors(p);
-      // also clean stale "Цвет — *" rows from specifications
+      const categoryId = categoryIdByShape.get(p.shape);
+      const firstColor = p.variants?.[0]?.name;
+      const subtitle = firstColor ? `Acetate · ${firstColor}` : undefined;
       const specs = (cur.specifications ?? []).filter(
         (s: { name?: string | null }) =>
           !(s.name ?? "").toLowerCase().startsWith("цвет —"),
@@ -252,11 +254,24 @@ async function main() {
         collection: "products",
         id: cur.id,
         data: {
+          title: p.name,
+          subtitle,
+          type: "sun",
+          badge: p.isNew ? "new" : "none",
+          category: categoryId,
+          price: p.price,
+          shortDescription: p.description,
+          sku: p.id.toUpperCase(),
+          mainImage: mainId,
+          gallery,
           colors,
           specifications: specs,
+          isPublished: true,
+          isFeatured: Boolean(p.isNew),
+          inStock: (p.variants ?? []).reduce((s, v) => s + (v.stock ?? 0), 0) > 0,
         },
       });
-      console.log(`[seed]   updated ${p.slug} with ${colors.length} colors`);
+      console.log(`[seed]   updated ${p.slug}`);
       continue;
     }
 
