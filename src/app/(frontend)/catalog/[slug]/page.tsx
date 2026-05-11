@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, sanitizePhone } from "@/lib/format";
 import { payload } from "@/lib/payload";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 
@@ -60,9 +60,7 @@ export default async function ProductPage({ params }: Params) {
   };
 
   const settings = await p.findGlobal({ slug: "settings" });
-  const whatsapp = settings.whatsapp
-    ? settings.whatsapp.replace(/[^\d]/g, "")
-    : null;
+  const whatsapp = sanitizePhone(settings.whatsapp);
 
   const typeLabel =
     product.type === "optic" ? "Оптические" : "Солнцезащитные";

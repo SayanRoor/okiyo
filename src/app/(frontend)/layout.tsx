@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { WhatsAppFab } from "@/components/whatsapp-fab";
 import { payload } from "@/lib/payload";
 
 import "./globals.css";
@@ -76,6 +77,7 @@ export default async function RootLayout({
         <Header settings={settings} categories={categories.docs} />
         <main className="flex-1">{children}</main>
         <Footer settings={settings} />
+        <WhatsAppFab whatsapp={settings.whatsapp} />
       </body>
     </html>
   );

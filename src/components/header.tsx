@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { mediaUrl } from "@/lib/format";
+import { mediaUrl, sanitizePhone } from "@/lib/format";
 
 type Settings = {
   siteName?: string | null;
@@ -40,8 +40,10 @@ export function Header({
           { text: "Привезём за 2 часа" },
         ];
 
+  const waNumber = sanitizePhone(settings.whatsapp);
+
   return (
-    <header>
+    <header className="okiyo-header">
       {/* TOP BAR */}
       <div
         className="hidden sm:flex items-center justify-center gap-2 sm:gap-3 py-2.5 border-b"
@@ -142,9 +144,9 @@ export function Header({
         {/* Правая часть */}
         <div className="flex gap-3 sm:gap-4 justify-end items-center text-[13px]">
           <ThemeToggle />
-          {settings.whatsapp ? (
+          {waNumber ? (
             <a
-              href={`https://wa.me/${settings.whatsapp.replace(/[^\d]/g, "")}`}
+              href={`https://wa.me/${waNumber}`}
               target="_blank"
               rel="noreferrer"
               className="hidden sm:inline-flex items-center gap-2 hover:opacity-60 transition-opacity"

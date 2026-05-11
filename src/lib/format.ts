@@ -36,3 +36,13 @@ export function mediaAlt(media: unknown): string {
   const m = media as { alt?: string | null };
   return m.alt ?? "";
 }
+
+/**
+ * Очищает номер от всего кроме цифр — для wa.me и tel: ссылок.
+ * Возвращает null, если на входе пусто или цифр нет вовсе.
+ */
+export function sanitizePhone(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const digits = value.replace(/[^\d]/g, "");
+  return digits.length >= 9 ? digits : null;
+}

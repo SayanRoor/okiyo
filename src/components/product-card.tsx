@@ -122,7 +122,12 @@ export function ProductCard({ product }: { product: Product }) {
           >
             Нет в наличии
           </span>
-        ) : null}
+        ) : (
+          /* Hover-CTA — выезжает снизу. Подсказка пользователю, что карточка кликабельна. */
+          <span className="card-cta" aria-hidden>
+            Подробнее →
+          </span>
+        )}
       </div>
 
       {/* Meta */}
