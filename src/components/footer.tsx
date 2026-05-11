@@ -37,15 +37,15 @@ export function Footer({ settings }: { settings: Settings }) {
         <div className="okiyo-footer-grid">
           <div className="brand-col">
             <div
-              className="mb-3.5"
+              className="mb-4"
               style={{
-                // Тот же стиль, что в шапке — фирменный «тиснёный» лого
-                fontFamily: "var(--font-sans), -apple-system, sans-serif",
-                fontWeight: 300,
-                fontSize: 28,
-                letterSpacing: "0.42em",
+                fontFamily: "var(--font-logo), 'Optima', sans-serif",
+                fontWeight: 400,
+                fontSize: 24,
+                letterSpacing: "0.46em",
                 color: "var(--ink)",
-                paddingLeft: "0.42em",
+                paddingLeft: "0.46em",
+                whiteSpace: "nowrap",
               }}
             >
               {brandSpaced}

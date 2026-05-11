@@ -33,6 +33,7 @@ html[data-theme="night"] {
   --color-card: var(--card);
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: var(--font-serif), serif;
+  --font-logo: var(--font-logo), "Optima", "Avenir", sans-serif;
 }
 
 * {
@@ -97,35 +98,71 @@ img {
   font-weight: 500;
 }
 
-/* Универсальная кнопка */
+/* --------------------------------------------------------- */
+/* Премиальная кнопка — как у Loewe / Toteme / Aesop          */
+/* --------------------------------------------------------- */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 26px;
+  gap: 12px;
+  padding: 0 30px;
+  height: 50px;
+  min-height: 50px;
+
+  font-family: var(--font-sans), sans-serif;
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
   font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+
   border: 1px solid var(--ink);
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    opacity 0.2s ease;
   background: transparent;
   color: var(--ink);
-  font-family: inherit;
-  min-height: 44px;
+  cursor: pointer;
+
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  will-change: transform;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* Микро-анимация стрелки внутри кнопки */
+.btn > .arrow,
+.btn :is(span, em).arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.btn:hover > .arrow,
+.btn:hover :is(span, em).arrow {
+  transform: translateX(4px);
 }
 
 .btn-primary {
   background: var(--ink);
   color: var(--bg);
+  box-shadow: 0 0 0 1px var(--ink);
 }
 
 .btn-primary:hover {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.btn-ghost {
   background: transparent;
   color: var(--ink);
 }
@@ -133,6 +170,7 @@ img {
 .btn-ghost:hover {
   background: var(--ink);
   color: var(--bg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 
 /* Иконочная кнопка */
@@ -355,6 +393,54 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Hero-слайдшоу — занимает весь блок hero-visual */
+.hero-slideshow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-slideshow__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1000ms ease;
+}
+
+.hero-slideshow__slide[data-active="true"] {
+  opacity: 1;
+}
+
+.hero-slideshow__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.hero-slideshow__dots button {
+  width: 28px;
+  height: 2px;
+  border: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    width 0.3s ease;
+}
+
+.hero-slideshow__dots button[data-active="true"] {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.hero-slideshow__dots button:hover {
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .hero-visual .seal {

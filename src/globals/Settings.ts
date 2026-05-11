@@ -78,7 +78,28 @@ export const Settings: GlobalConfig = {
               name: "heroImage",
               type: "upload",
               relationTo: "media",
-              label: "Фон для hero-секции",
+              label: "Главное фото в hero (или одно из карусели)",
+              admin: {
+                description:
+                  "Если ниже задана карусель — это фото будет первым в ней.",
+              },
+            },
+            {
+              name: "heroImages",
+              type: "array",
+              label: "Карусель в hero (модель + очки)",
+              admin: {
+                description:
+                  "Загрузите 2–5 фото — будут сменять друг друга на главной с плавным crossfade каждые ~5 секунд. Оптимально: квадратные или 4:5, по длинной стороне 1600–2400px.",
+              },
+              fields: [
+                {
+                  name: "image",
+                  type: "upload",
+                  relationTo: "media",
+                  required: true,
+                },
+              ],
             },
             {
               name: "heroCtaLabel",

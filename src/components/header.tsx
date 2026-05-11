@@ -128,14 +128,16 @@ export function Header({
           ) : (
             <div
               style={{
-                // Тонкий sans + большой трекинг — как тиснёный логотип на фирменном чехле OKIYO
-                fontFamily: "var(--font-sans), -apple-system, sans-serif",
-                fontWeight: 300,
-                fontSize: 30,
-                letterSpacing: "0.42em",
+                // Premium-логошрифт Tenor Sans — geometric sans, тонкие штрихи.
+                // Так же выглядит тиснёная надпись OKIYO на фирменном чехле.
+                fontFamily: "var(--font-logo), 'Optima', sans-serif",
+                fontWeight: 400,
+                fontSize: 22,
+                letterSpacing: "0.46em",
                 lineHeight: 1,
                 color: "var(--ink)",
-                paddingLeft: "0.42em" /* компенсируем трекинг последней буквы */,
+                paddingLeft: "0.46em",
+                whiteSpace: "nowrap",
               }}
             >
               {brandSpaced}

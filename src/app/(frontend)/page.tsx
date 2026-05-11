@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { CollectionGrid } from "@/components/collection-grid";
+import { HeroSlideshow } from "@/components/hero-slideshow";
 import { mediaAlt, mediaUrl } from "@/lib/format";
 import { payload } from "@/lib/payload";
 
@@ -20,8 +20,26 @@ export default async function HomePage() {
     }),
   ]);
 
-  const heroBg = mediaUrl(settings.heroImage, "hero");
-  const heroAlt = mediaAlt(settings.heroImage);
+  // Собираем слайды для карусели: сначала главное фото (если есть),
+  // затем массив дополнительных. Дубли отсекаем по url.
+  type Slide = { url: string; alt: string };
+  const slides: Slide[] = [];
+  const mainUrl = mediaUrl(settings.heroImage, "hero");
+  if (mainUrl) {
+    slides.push({
+      url: mainUrl,
+      alt: mediaAlt(settings.heroImage) || "OKIYO",
+    });
+  }
+  const extra =
+    (settings.heroImages as { id?: string; image?: unknown }[] | undefined) ??
+    [];
+  for (const h of extra) {
+    const u = mediaUrl(h.image, "hero");
+    if (!u || slides.some((s) => s.url === u)) continue;
+    slides.push({ url: u, alt: mediaAlt(h.image) || "OKIYO" });
+  }
+
   const heroEyebrow = settings.heroEyebrow || "Spring Collection — 2026";
   const heroTitle = settings.heroTitle || "Тише линий — ярче взгляд.";
   const heroSubtitle =
@@ -68,7 +86,10 @@ export default async function HomePage() {
           </p>
           <div className="mt-10 flex gap-3 flex-wrap">
             <Link href={heroCtaHref} className="btn btn-primary">
-              {heroCtaLabel} →
+              <span>{heroCtaLabel}</span>
+              <span className="arrow" aria-hidden>
+                →
+              </span>
             </Link>
             <Link href="/contacts" className="btn btn-ghost">
               Записаться на примерку
@@ -77,52 +98,7 @@ export default async function HomePage() {
         </div>
 
         <div className="hero-visual">
-          {heroBg ? (
-            <Image
-              src={heroBg}
-              alt={heroAlt || "OKIYO"}
-              fill
-              priority
-              sizes="(min-width:1100px) 40vw, 100vw"
-              className="object-cover"
-            />
-          ) : (
-            // Заглушка-брендмарк, пока не загружено фото модели в очках.
-            // Подсказка для админа: /admin → Настройки сайта → Главная → Фон для hero-секции.
-            <div
-              className="flex flex-col items-center justify-center text-center px-6"
-              style={{ width: "100%", height: "100%" }}
-            >
-              <div
-                style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontWeight: 300,
-                  fontSize: "clamp(48px, 7vw, 92px)",
-                  letterSpacing: "0.42em",
-                  color: "var(--ink)",
-                  paddingLeft: "0.42em",
-                  lineHeight: 1,
-                }}
-              >
-                O K I Y O
-              </div>
-              <div
-                className="mt-4"
-                style={{
-                  fontFamily: "var(--font-serif), serif",
-                  fontStyle: "italic",
-                  fontSize: 14,
-                  color: "var(--muted)",
-                  letterSpacing: "0.18em",
-                }}
-              >
-                Загрузите фото в админке
-              </div>
-            </div>
-          )}
-          {heroBg ? (
-            <div className="seal">— OKIYO · Kūki —</div>
-          ) : null}
+          <HeroSlideshow slides={slides} />
         </div>
       </section>
 

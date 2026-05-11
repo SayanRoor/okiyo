@@ -2,6 +2,7 @@ import * as migration_20260509_232232_initial from './20260509_232232_initial';
 import * as migration_20260510_052735_settings_hero_extras from './20260510_052735_settings_hero_extras';
 import * as migration_20260510_090603_products_colors from './20260510_090603_products_colors';
 import * as migration_20260510_143000_redesign_fields from './20260510_143000_redesign_fields';
+import * as migration_20260511_180000_hero_carousel from './20260511_180000_hero_carousel';
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20260510_143000_redesign_fields.up,
     down: migration_20260510_143000_redesign_fields.down,
     name: '20260510_143000_redesign_fields',
+  },
+  {
+    up: migration_20260511_180000_hero_carousel.up,
+    down: migration_20260511_180000_hero_carousel.down,
+    name: '20260511_180000_hero_carousel',
   },
 ];

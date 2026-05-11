@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter, Tenor_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { Footer } from "@/components/footer";
@@ -21,6 +21,15 @@ const serif = Cormorant_Garamond({
   subsets: ["latin", "cyrillic"],
   weight: ["300", "400", "500"],
   style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Premium-логошрифт. Geometric sans, тонкие штрихи, единственный weight 400.
+// Так пишут лого Loewe / Jacquemus / Toteme — близкий аналог Optima.
+const logo = Tenor_Sans({
+  variable: "--font-logo",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400"],
   display: "swap",
 });
 
@@ -63,7 +72,7 @@ export default async function RootLayout({
       lang="ru"
       data-theme={theme}
       suppressHydrationWarning
-      className={`${sans.variable} ${serif.variable} h-full antialiased`}
+      className={`${sans.variable} ${serif.variable} ${logo.variable} h-full antialiased`}
     >
       <head>
         {/* Блокируем FOUC до гидратации: читаем localStorage и применяем тему синхронно. */}
