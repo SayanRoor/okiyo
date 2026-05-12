@@ -206,18 +206,32 @@ async function main() {
   }
 
   // ---- Hero images -------------------------------------------------------
-  await payload.updateGlobal({
-    slug: "settings",
-    data: {
-      heroImage: await ensureMedia("/kaze-1.jpg", "KAZE — hero"),
-      heroImages: [
-        { image: await ensureMedia("/takeshi-1.jpg", "TAKESHI — hero") },
-        { image: await ensureMedia("/fuji-1.png", "FUJI — hero") },
-        { image: await ensureMedia("/one-1.png", "ONE — hero") },
-      ],
-    },
-  });
-  console.log("[seed] hero images set");
+  async function findMediaByFilename(filename: string): Promise<number | null> {
+    const r = await payload.find({
+      collection: "media",
+      where: { filename: { equals: filename } },
+      limit: 1,
+    });
+    return r.docs[0] ? (r.docs[0].id as number) : null;
+  }
+  const heroImageId = await findMediaByFilename("kaze-1.jpg");
+  const heroImg2 = await findMediaByFilename("takeshi-1.jpg");
+  const heroImg3 = await findMediaByFilename("fuji-1.png");
+  const heroImg4 = await findMediaByFilename("one-1.png");
+  if (heroImageId) {
+    await payload.updateGlobal({
+      slug: "settings",
+      data: {
+        heroImage: heroImageId,
+        heroImages: [heroImg2, heroImg3, heroImg4]
+          .filter(Boolean)
+          .map((id) => ({ image: id as number })),
+      },
+    });
+    console.log("[seed] hero images set");
+  } else {
+    console.log("[seed] hero images skipped — media not found");
+  }
 
   // ---- Products ----------------------------------------------------------
   async function buildColors(
