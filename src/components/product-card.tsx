@@ -35,9 +35,12 @@ export function ProductCard({ product }: { product: Product }) {
     Boolean(c && typeof c.hex === "string"),
   );
 
+  // Защита от старых записей без slug — не строим битую ссылку.
+  const href = product.slug ? `/catalog/${product.slug}` : "/catalog";
+
   return (
     <Link
-      href={`/catalog/${product.slug}`}
+      href={href}
       className="group relative block"
       aria-label={product.title}
     >

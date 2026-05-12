@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { slugify } from "../lib/slugify";
+
 export const Categories: CollectionConfig = {
   slug: "categories",
   admin: {
@@ -8,6 +10,17 @@ export const Categories: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data;
+        const raw = (data.slug as string | undefined) || (data.title as string | undefined) || "";
+        const normalized = slugify(raw);
+        if (normalized) data.slug = normalized;
+        return data;
+      },
+    ],
   },
   fields: [
     {
@@ -18,11 +31,11 @@ export const Categories: CollectionConfig = {
     {
       name: "slug",
       type: "text",
-      required: true,
       unique: true,
       index: true,
       admin: {
-        description: "Используется в URL: /catalog/{slug}",
+        description:
+          "URL: /categories/{slug}. Можно оставить пустым — сгенерируется из названия.",
       },
     },
     {

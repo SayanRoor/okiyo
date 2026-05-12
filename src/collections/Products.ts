@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { slugify } from "../lib/slugify";
+
 export const Products: CollectionConfig = {
   slug: "products",
   admin: {
@@ -9,6 +11,21 @@ export const Products: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        // Если slug пустой — генерируем из title.
+        // Если slug непустой — нормализуем (на случай если ввели руками с пробелами/кириллицей).
+        if (!data) return data;
+        const raw = (data.slug as string | undefined) || (data.title as string | undefined) || "";
+        const normalized = slugify(raw);
+        if (normalized) {
+          data.slug = normalized;
+        }
+        return data;
+      },
+    ],
   },
   fields: [
     {
@@ -27,11 +44,12 @@ export const Products: CollectionConfig = {
             {
               name: "slug",
               type: "text",
-              required: true,
               unique: true,
               index: true,
               admin: {
-                description: "URL вида /catalog/{slug}",
+                description:
+                  "URL: /catalog/{slug}. Можно оставить пустым — сгенерируется из названия (кириллица транслитерируется в латиницу).",
+                position: "sidebar",
               },
             },
             {
