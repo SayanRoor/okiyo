@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Product } from "@/payload-types";
 
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
@@ -309,8 +308,8 @@ export default async function ProductPage({ params }: Params) {
             Ещё из коллекции
           </h2>
           <div className="okiyo-grid">
-            {related.docs.filter((r) => r.slug).map((r) => (
-              <ProductCard key={r.id} product={r as unknown as Product} />
+            {related.docs.map((r) => (
+              <ProductCard key={r.id} product={r} />
             ))}
           </div>
         </section>

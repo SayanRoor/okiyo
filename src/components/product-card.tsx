@@ -7,7 +7,7 @@ type Color = { hex: string; name?: string | null };
 
 type Product = {
   id: string | number;
-  slug: string;
+  slug?: string | null;
   title: string;
   subtitle?: string | null;
   price: number;
