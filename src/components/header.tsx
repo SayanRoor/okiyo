@@ -14,7 +14,7 @@ type Settings = {
 type Category = {
   id: string | number;
   title: string;
-  slug: string;
+  slug?: string | null;
 };
 
 export function Header({
