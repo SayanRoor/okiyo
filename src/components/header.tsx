@@ -1,13 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { mediaUrl, sanitizePhone } from "@/lib/format";
+import { sanitizePhone } from "@/lib/format";
 
 type Settings = {
   siteName?: string | null;
   tagline?: string | null;
-  logo?: unknown;
   phone?: string | null;
   whatsapp?: string | null;
   topbar?: { id?: string | null; text: string }[] | null;
@@ -27,7 +25,6 @@ export function Header({
   settings: Settings;
   categories: Category[];
 }) {
-  const logoUrl = mediaUrl(settings.logo, "thumbnail");
   const brandName = settings.siteName || "OKIYO";
   // Эталонный визуальный логотип — буквы с большим letter-spacing.
   const brandSpaced = brandName.split("").join(" ");
@@ -110,39 +107,28 @@ export function Header({
           </Link>
         </div>
 
-        {/* Лого по центру */}
+        {/* Лого по центру — всегда текстовый брендмарк в Tenor Sans.
+            Старая картинка-логотип из Settings.logo не используется в шапке,
+            чтобы не конкурировать с тиснёной надписью. */}
         <Link
           href="/"
           className="flex items-center justify-center min-w-0"
           aria-label={brandName}
         >
-          {logoUrl ? (
-            <Image
-              src={logoUrl}
-              alt={brandName}
-              width={36}
-              height={36}
-              className="h-8 w-8 object-contain"
-              priority
-            />
-          ) : (
-            <div
-              style={{
-                // Premium-логошрифт Tenor Sans — geometric sans, тонкие штрихи.
-                // Так же выглядит тиснёная надпись OKIYO на фирменном чехле.
-                fontFamily: "var(--font-logo), 'Optima', sans-serif",
-                fontWeight: 400,
-                fontSize: 22,
-                letterSpacing: "0.46em",
-                lineHeight: 1,
-                color: "var(--ink)",
-                paddingLeft: "0.46em",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {brandSpaced}
-            </div>
-          )}
+          <div
+            style={{
+              fontFamily: "var(--font-logo), 'Optima', sans-serif",
+              fontWeight: 400,
+              fontSize: 22,
+              letterSpacing: "0.46em",
+              lineHeight: 1,
+              color: "var(--ink)",
+              paddingLeft: "0.46em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {brandSpaced}
+          </div>
         </Link>
 
         {/* Правая часть */}
