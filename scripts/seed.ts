@@ -205,6 +205,20 @@ async function main() {
     return id;
   }
 
+  // ---- Hero images -------------------------------------------------------
+  await payload.updateGlobal({
+    slug: "settings",
+    data: {
+      heroImage: await ensureMedia("/kaze-1.jpg", "KAZE — hero"),
+      heroImages: [
+        { image: await ensureMedia("/takeshi-1.jpg", "TAKESHI — hero") },
+        { image: await ensureMedia("/fuji-1.png", "FUJI — hero") },
+        { image: await ensureMedia("/one-1.png", "ONE — hero") },
+      ],
+    },
+  });
+  console.log("[seed] hero images set");
+
   // ---- Products ----------------------------------------------------------
   async function buildColors(
     p: SeedProduct,
