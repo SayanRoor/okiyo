@@ -547,21 +547,20 @@ img {
   opacity: 1;
 }
 
-/* Главное фото — естественная высота, max-height ограничивает.
-   Никакого fixed aspect-ratio: и горизонтальные, и вертикальные снимки
-   рендерятся в своих пропорциях, без обрезки. */
+/* Главное фото — без рамки и подложки. Фото в естественных пропорциях,
+   высота определяется самим снимком, max-height защищает от слишком
+   высоких портретов. */
 .okiyo-gallery__main {
   position: relative;
   width: 100%;
-  background: var(--card);
+  background: transparent;
   border: 0;
-  padding: 24px;
+  padding: 0;
   cursor: zoom-in;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 480px;
 }
 
 .okiyo-gallery__main-img {
@@ -576,22 +575,26 @@ img {
 
 .okiyo-gallery__zoom {
   position: absolute;
-  right: 14px;
-  bottom: 14px;
-  width: 40px;
-  height: 40px;
+  right: 12px;
+  bottom: 12px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--ink);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  opacity: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
 }
 
 .okiyo-gallery__main:hover .okiyo-gallery__zoom {
+  opacity: 1;
   transform: scale(1.06);
 }
 
@@ -606,16 +609,15 @@ img {
 .okiyo-gallery__mobile-slide {
   position: relative;
   flex: 0 0 100%;
-  background: var(--card);
+  background: transparent;
   border: 0;
-  padding: 16px;
+  padding: 0;
   scroll-snap-align: start;
   cursor: zoom-in;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 360px;
 }
 
 .okiyo-gallery__mobile-img {
