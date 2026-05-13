@@ -15,14 +15,31 @@ export const Products: CollectionConfig = {
   hooks: {
     beforeValidate: [
       ({ data }) => {
-        // Если slug пустой — генерируем из title.
-        // Если slug непустой — нормализуем (на случай если ввели руками с пробелами/кириллицей).
         if (!data) return data;
+
+        // 1. Slug: если пустой — генерируем из title; если непустой — нормализуем.
         const raw = (data.slug as string | undefined) || (data.title as string | undefined) || "";
         const normalized = slugify(raw);
         if (normalized) {
           data.slug = normalized;
         }
+
+        // 2. Specifications: если пользователь ничего не вписал, подставляем
+        // дефолтный набор, чтобы на странице товара появилась сетка-плейсхолдер.
+        // Применяется и к новым товарам, и к существующим (defaultValue Payload
+        // в array-полях срабатывает только на create — этот хук покрывает update).
+        const specs = data.specifications;
+        if (!Array.isArray(specs) || specs.length === 0) {
+          data.specifications = [
+            { name: "Оправа", value: "" },
+            { name: "Линзы", value: "" },
+            { name: "Защита", value: "UV400" },
+            { name: "Ширина", value: "" },
+            { name: "Длина дужки", value: "" },
+            { name: "Вес", value: "" },
+          ];
+        }
+
         return data;
       },
     ],
