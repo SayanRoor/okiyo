@@ -182,15 +182,15 @@ export function ProductGallery({
           aria-label="Открыть фото на весь экран"
         >
           {activeImage ? (
-            <Image
+            // Обычный <img>, а не Image fill — высота определяется самим фото.
+            // Это премиум-паттерн (Saint Laurent / Mykita): каждый снимок
+            // показывается в своих пропорциях без обрезки и чёрных полей.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={activeImage.url}
               alt={activeImage.alt}
-              fill
-              priority
-              sizes="(min-width:1024px) 50vw, 100vw"
-              // object-contain — фото никогда не обрезается, всегда видно
-              // целиком на бежевом фоне var(--card). Как у Apple / Aesop.
-              className="object-contain p-4"
+              className="okiyo-gallery__main-img"
+              loading="eager"
             />
           ) : null}
           <span className="okiyo-gallery__zoom" aria-hidden>
@@ -224,13 +224,12 @@ export function ProductGallery({
               className="okiyo-gallery__mobile-slide"
               aria-label={`Фото ${idx + 1}, тап чтобы увеличить`}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={img.url}
                 alt={img.alt}
-                fill
-                priority={idx === 0}
-                sizes="100vw"
-                className="object-contain p-3"
+                loading={idx === 0 ? "eager" : "lazy"}
+                className="okiyo-gallery__mobile-img"
               />
             </button>
           ))}
@@ -359,17 +358,13 @@ export function ProductGallery({
             data-zoomed={zoomed}
             onClick={() => setZoomed((z) => !z)}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={activeImage.url}
               alt={activeImage.alt}
-              fill
-              priority
-              sizes="90vw"
-              className={zoomed ? "object-contain scale-150" : "object-contain"}
-              style={{
-                transition: "transform 0.3s ease",
-                cursor: zoomed ? "zoom-out" : "zoom-in",
-              }}
+              className="okiyo-lightbox__img"
+              data-zoomed={zoomed}
+              style={{ cursor: zoomed ? "zoom-out" : "zoom-in" }}
             />
           </div>
 
