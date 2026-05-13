@@ -3,6 +3,7 @@ import * as migration_20260510_052735_settings_hero_extras from './20260510_0527
 import * as migration_20260510_090603_products_colors from './20260510_090603_products_colors';
 import * as migration_20260510_143000_redesign_fields from './20260510_143000_redesign_fields';
 import * as migration_20260511_180000_hero_carousel from './20260511_180000_hero_carousel';
+import * as migration_20260513_000000_products_rels from './20260513_000000_products_rels';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260511_180000_hero_carousel.up,
     down: migration_20260511_180000_hero_carousel.down,
     name: '20260511_180000_hero_carousel',
+  },
+  {
+    up: migration_20260513_000000_products_rels.up,
+    down: migration_20260513_000000_products_rels.down,
+    name: '20260513_000000_products_rels',
   },
 ];
