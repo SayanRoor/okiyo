@@ -21,7 +21,10 @@ type Color = {
 export type ProductGalleryProps = {
   productTitle: string;
   mainImage: unknown;
+  /** Старая форма: массив объектов { image: Media }. */
   gallery?: Array<{ image?: unknown }> | null;
+  /** Новая форма: массив Media (upload hasMany). */
+  photos?: unknown[] | null;
   colors?: Color[] | null;
 };
 
@@ -41,19 +44,30 @@ export function ProductGallery({
   productTitle,
   mainImage,
   gallery,
+  photos,
   colors,
 }: ProductGalleryProps) {
   const baseMain = useMemo(
     () => toImage(mainImage, productTitle),
     [mainImage, productTitle],
   );
-  const baseGallery: ImageLike[] = useMemo(
-    () =>
-      (gallery ?? [])
-        .map((g, i) => toImage(g.image, `${productTitle} — ${i + 1}`))
-        .filter((g): g is ImageLike => g != null),
-    [gallery, productTitle],
-  );
+
+  // Источник для миниатюр — храним вместе с полноразмерным URL.
+  type RichImage = ImageLike & { thumb: string | null };
+  const baseGallery: RichImage[] = useMemo(() => {
+    const list: RichImage[] = [];
+    let counter = 0;
+    const push = (media: unknown) => {
+      const full = toImage(media, `${productTitle} — ${++counter}`);
+      if (!full) return;
+      const thumb = toThumb(media, full.alt)?.url ?? null;
+      list.push({ ...full, thumb });
+    };
+    // Сначала новые photos (upload hasMany), потом legacy gallery.
+    for (const m of photos ?? []) push(m);
+    for (const g of gallery ?? []) push(g?.image);
+    return list;
+  }, [photos, gallery, productTitle]);
   const safeColors = (colors ?? []).filter((c) => c?.hex);
 
   const initialColorIdx = safeColors.findIndex((c) => c.image);
@@ -67,12 +81,13 @@ export function ProductGallery({
       ? toImage(safeColors[activeColorIdx]?.image, `${productTitle} — ${safeColors[activeColorIdx]?.name}`)
       : null;
 
-  const allImages: ImageLike[] = useMemo(() => {
-    const list: ImageLike[] = [];
-    if (baseMain) list.push(baseMain);
+  const mainThumb = toThumb(mainImage, baseMain?.alt ?? productTitle)?.url ?? null;
+  const allImages: RichImage[] = useMemo(() => {
+    const list: RichImage[] = [];
+    if (baseMain) list.push({ ...baseMain, thumb: mainThumb });
     list.push(...baseGallery);
     return list;
-  }, [baseMain, baseGallery]);
+  }, [baseMain, baseGallery, mainThumb]);
 
   const displayedMain = colorImage ?? allImages[activeThumbIdx] ?? baseMain;
 
@@ -102,10 +117,7 @@ export function ProductGallery({
       {allImages.length > 1 && !colorImage ? (
         <div className="mt-3 grid grid-cols-4 gap-3">
           {allImages.map((img, idx) => {
-            const thumb = toThumb(
-              idx === 0 ? mainImage : gallery?.[idx - 1]?.image,
-              img.alt,
-            );
+            const src = img.thumb ?? img.url;
             const isActive = idx === activeThumbIdx;
             return (
               <button
@@ -127,15 +139,13 @@ export function ProductGallery({
                   cursor: "pointer",
                 }}
               >
-                {thumb ? (
-                  <Image
-                    src={thumb.url}
-                    alt={thumb.alt}
-                    fill
-                    sizes="20vw"
-                    className="object-cover"
-                  />
-                ) : null}
+                <Image
+                  src={src}
+                  alt={img.alt}
+                  fill
+                  sizes="20vw"
+                  className="object-cover"
+                />
               </button>
             );
           })}

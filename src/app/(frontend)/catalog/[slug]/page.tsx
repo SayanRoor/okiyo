@@ -57,6 +57,7 @@ export default async function ProductPage({ params }: Params) {
     type?: "sun" | "optic" | null;
     badge?: string | null;
     colors?: { hex: string; name?: string | null }[] | null;
+    photos?: unknown[] | null;
   };
 
   const settings = await p.findGlobal({ slug: "settings" });
@@ -122,6 +123,7 @@ export default async function ProductPage({ params }: Params) {
         <ProductGallery
           productTitle={product.title}
           mainImage={product.mainImage}
+          photos={product.photos}
           gallery={product.gallery}
           colors={
             product.colors as

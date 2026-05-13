@@ -266,9 +266,9 @@ async function main() {
       const cur = existing.docs[0];
       console.log(`[seed] updating product: ${p.slug}`);
       const mainId = await ensureMedia(p.images[0], `${p.name} — главное фото`);
-      const gallery: { image: number }[] = [];
+      const photos: number[] = [];
       for (const img of p.images.slice(1)) {
-        gallery.push({ image: await ensureMedia(img, `${p.name} — галерея`) });
+        photos.push(await ensureMedia(img, `${p.name} — галерея`));
       }
       const colors = await buildColors(p);
       const categoryId = categoryIdByShape.get(p.shape);
@@ -291,7 +291,9 @@ async function main() {
           shortDescription: p.description,
           sku: p.id.toUpperCase(),
           mainImage: mainId,
-          gallery,
+          photos,
+          // Сбрасываем старое legacy-поле — переносим на photos
+          gallery: [],
           colors,
           specifications: specs,
           isPublished: true,
@@ -305,9 +307,9 @@ async function main() {
 
     console.log(`[seed] uploading product: ${p.name}`);
     const mainId = await ensureMedia(p.images[0], `${p.name} — главное фото`);
-    const gallery: { image: number }[] = [];
+    const photos: number[] = [];
     for (const img of p.images.slice(1)) {
-      gallery.push({ image: await ensureMedia(img, `${p.name} — галерея`) });
+      photos.push(await ensureMedia(img, `${p.name} — галерея`));
     }
     const colors = await buildColors(p);
     const categoryId = categoryIdByShape.get(p.shape);
@@ -335,7 +337,7 @@ async function main() {
         shortDescription: p.description,
         sku: p.id.toUpperCase(),
         mainImage: mainId,
-        gallery,
+        photos,
         colors,
         isPublished: true,
         isFeatured: Boolean(p.isNew),

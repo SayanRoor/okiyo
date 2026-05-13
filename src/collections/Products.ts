@@ -136,11 +136,31 @@ export const Products: CollectionConfig = {
               relationTo: "media",
               required: true,
               label: "Главное фото",
+              admin: {
+                description: "Обложка карточки в каталоге.",
+              },
+            },
+            {
+              name: "photos",
+              type: "upload",
+              relationTo: "media",
+              hasMany: true,
+              label: "Доп. фото (можно выбрать сразу несколько)",
+              admin: {
+                description:
+                  "Откроется диалог выбора файлов — выделите 5–10 фото за раз с зажатым Cmd/Shift.",
+              },
             },
             {
               name: "gallery",
               type: "array",
-              label: "Галерея",
+              label: "Старая галерея (использовать только для совместимости)",
+              admin: {
+                description:
+                  "Не заполняйте новые товары. Поле оставлено для старых данных — переезжайте на «Доп. фото» выше.",
+                condition: (data) =>
+                  Array.isArray(data?.gallery) && data.gallery.length > 0,
+              },
               fields: [
                 {
                   name: "image",

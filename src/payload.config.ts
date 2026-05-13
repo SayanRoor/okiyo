@@ -32,9 +32,14 @@ export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
     // В dev — push: схема в БД синхронизируется при старте без миграций.
-    // В prod — push: false, схема меняется только через явные миграции из ./migrations,
-    // которые применяются скриптом `entrypoint.sh` (`payload migrate`) при старте контейнера.
-    push: process.env.NODE_ENV !== "production",
+    // В prod — обычно push: false, изменения идут только через явные миграции.
+    // Чтобы временно разрешить авто-синхронизацию схемы (например, после добавления
+    // нового поля без сгенерированной миграции), поставьте в .env на сервере:
+    //   PAYLOAD_PUSH_SCHEMA=1
+    // После успешного применения — уберите флаг и перезапустите.
+    push:
+      process.env.PAYLOAD_PUSH_SCHEMA === "1" ||
+      process.env.NODE_ENV !== "production",
     prodMigrations: migrations,
   }),
   sharp,
