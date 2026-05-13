@@ -188,7 +188,9 @@ export function ProductGallery({
               fill
               priority
               sizes="(min-width:1024px) 50vw, 100vw"
-              className="object-cover"
+              // object-contain — фото никогда не обрезается, всегда видно
+              // целиком на бежевом фоне var(--card). Как у Apple / Aesop.
+              className="object-contain p-4"
             />
           ) : null}
           <span className="okiyo-gallery__zoom" aria-hidden>
@@ -228,7 +230,7 @@ export function ProductGallery({
                 fill
                 priority={idx === 0}
                 sizes="100vw"
-                className="object-cover"
+                className="object-contain p-3"
               />
             </button>
           ))}
