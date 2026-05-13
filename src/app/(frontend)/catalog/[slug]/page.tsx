@@ -58,6 +58,7 @@ export default async function ProductPage({ params }: Params) {
     badge?: string | null;
     colors?: { hex: string; name?: string | null }[] | null;
     photos?: unknown[] | null;
+    kit?: string | null;
   };
 
   const settings = await p.findGlobal({ slug: "settings" });
@@ -203,30 +204,36 @@ export default async function ProductPage({ params }: Params) {
             </p>
           ) : null}
 
-          {product.specifications && product.specifications.length > 0 ? (
-            <dl
-              className="mt-8 border-y"
-              style={{ borderColor: "var(--line)" }}
-            >
-              {product.specifications.map(
-                (s: { name: string; value: string }, i: number) => (
-                  <div
-                    key={i}
-                    className="grid grid-cols-2 py-3"
-                    style={{
-                      borderBottom:
-                        i < product.specifications!.length - 1
-                          ? "1px solid var(--line)"
-                          : undefined,
-                      fontSize: 13,
-                    }}
-                  >
-                    <dt style={{ color: "var(--muted)" }}>{s.name}</dt>
-                    <dd style={{ color: "var(--ink)" }}>{s.value}</dd>
+          {(() => {
+            // Берём только спеки с непустым значением (defaultValue ставит пустые слоты).
+            const specs = (product.specifications ?? []).filter(
+              (s): s is { name: string; value: string } =>
+                Boolean(s?.name) && Boolean(s?.value && String(s.value).trim()),
+            );
+            if (specs.length === 0) return null;
+            return (
+              <dl className="okiyo-specs mt-10">
+                {specs.map((s, i) => (
+                  <div key={i} className="okiyo-specs__cell">
+                    <dt className="okiyo-specs__label">{s.name}</dt>
+                    <dd className="okiyo-specs__value">{s.value}</dd>
                   </div>
-                ),
-              )}
-            </dl>
+                ))}
+              </dl>
+            );
+          })()}
+
+          {product.kit ? (
+            <p
+              className="mt-5"
+              style={{
+                fontSize: 12,
+                color: "var(--muted)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {product.kit}
+            </p>
           ) : null}
 
           <div className="mt-10 flex flex-wrap gap-3">

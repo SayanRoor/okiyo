@@ -225,11 +225,45 @@ export const Products: CollectionConfig = {
             {
               name: "specifications",
               type: "array",
-              label: "Параметры",
-              fields: [
-                { name: "name", type: "text", required: true, label: "Название" },
-                { name: "value", type: "text", required: true, label: "Значение" },
+              label: "Параметры (показываются сеткой под фото)",
+              admin: {
+                description:
+                  "Типичный набор для очков: Оправа · Линзы · Защита · Ширина · Длина дужки · Вес. По 4 на ряд.",
+                initCollapsed: false,
+              },
+              defaultValue: [
+                { name: "Оправа", value: "" },
+                { name: "Линзы", value: "" },
+                { name: "Защита", value: "UV400" },
+                { name: "Ширина", value: "" },
+                { name: "Длина дужки", value: "" },
+                { name: "Вес", value: "" },
               ],
+              fields: [
+                {
+                  name: "name",
+                  type: "text",
+                  required: true,
+                  label: "Название",
+                  admin: { placeholder: "Оправа" },
+                },
+                {
+                  name: "value",
+                  type: "text",
+                  required: true,
+                  label: "Значение",
+                  admin: { placeholder: "Металл" },
+                },
+              ],
+            },
+            {
+              name: "kit",
+              type: "text",
+              label: "Комплектация (короткая строка под спеками)",
+              admin: {
+                placeholder: "В комплекте чехол и 2 салфетки",
+                description: "Что лежит в коробке — фраза одной строкой.",
+              },
             },
             {
               name: "inStock",
