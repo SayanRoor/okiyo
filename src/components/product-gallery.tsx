@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { mediaAlt, mediaUrl } from "@/lib/format";
 
@@ -28,7 +28,7 @@ export type ProductGalleryProps = {
   colors?: Color[] | null;
 };
 
-function toImage(media: unknown, fallbackAlt: string): ImageLike | null {
+function toHero(media: unknown, fallbackAlt: string): ImageLike | null {
   const url = mediaUrl(media, "hero");
   if (!url) return null;
   return { url, alt: mediaAlt(media) || fallbackAlt };
@@ -40,6 +40,8 @@ function toThumb(media: unknown, fallbackAlt: string): ImageLike | null {
   return { url, alt: mediaAlt(media) || fallbackAlt };
 }
 
+type RichImage = ImageLike & { thumb: string | null };
+
 export function ProductGallery({
   productTitle,
   mainImage,
@@ -47,111 +49,204 @@ export function ProductGallery({
   photos,
   colors,
 }: ProductGalleryProps) {
-  const baseMain = useMemo(
-    () => toImage(mainImage, productTitle),
-    [mainImage, productTitle],
-  );
-
-  // Источник для миниатюр — храним вместе с полноразмерным URL.
-  type RichImage = ImageLike & { thumb: string | null };
-  const baseGallery: RichImage[] = useMemo(() => {
+  // --------- Сборка всех фотографий в один массив ---------
+  const allImages: RichImage[] = useMemo(() => {
     const list: RichImage[] = [];
     let counter = 0;
     const push = (media: unknown) => {
-      const full = toImage(media, `${productTitle} — ${++counter}`);
+      const full = toHero(media, `${productTitle} — ${++counter}`);
       if (!full) return;
       const thumb = toThumb(media, full.alt)?.url ?? null;
       list.push({ ...full, thumb });
     };
-    // Сначала новые photos (upload hasMany), потом legacy gallery.
+    push(mainImage);
     for (const m of photos ?? []) push(m);
     for (const g of gallery ?? []) push(g?.image);
     return list;
-  }, [photos, gallery, productTitle]);
-  const safeColors = (colors ?? []).filter((c) => c?.hex);
+  }, [mainImage, photos, gallery, productTitle]);
 
+  // --------- Цвета ---------
+  const safeColors = (colors ?? []).filter((c) => c?.hex);
   const initialColorIdx = safeColors.findIndex((c) => c.image);
   const [activeColorIdx, setActiveColorIdx] = useState<number>(
     initialColorIdx >= 0 ? initialColorIdx : -1,
   );
-  const [activeThumbIdx, setActiveThumbIdx] = useState<number>(0);
-
   const colorImage =
     activeColorIdx >= 0
-      ? toImage(safeColors[activeColorIdx]?.image, `${productTitle} — ${safeColors[activeColorIdx]?.name}`)
+      ? toHero(
+          safeColors[activeColorIdx]?.image,
+          `${productTitle} — ${safeColors[activeColorIdx]?.name}`,
+        )
       : null;
 
-  const mainThumb = toThumb(mainImage, baseMain?.alt ?? productTitle)?.url ?? null;
-  const allImages: RichImage[] = useMemo(() => {
-    const list: RichImage[] = [];
-    if (baseMain) list.push({ ...baseMain, thumb: mainThumb });
-    list.push(...baseGallery);
-    return list;
-  }, [baseMain, baseGallery, mainThumb]);
+  // --------- Текущая активная картинка ---------
+  const [activeIdx, setActiveIdx] = useState(0);
 
-  const displayedMain = colorImage ?? allImages[activeThumbIdx] ?? baseMain;
+  // Когда выбран цвет с фото — он перекрывает базовый стек.
+  const displayedImages: RichImage[] = colorImage
+    ? [{ ...colorImage, thumb: null }]
+    : allImages;
+  const activeImage =
+    displayedImages[Math.min(activeIdx, displayedImages.length - 1)];
+
+  const selectThumb = useCallback((i: number) => {
+    setActiveColorIdx(-1);
+    setActiveIdx(i);
+  }, []);
+
+  // --------- Lightbox ---------
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+
+  const openLightbox = useCallback(() => {
+    setZoomed(false);
+    setLightboxOpen(true);
+  }, []);
+  const closeLightbox = useCallback(() => setLightboxOpen(false), []);
+
+  const next = useCallback(() => {
+    setActiveColorIdx(-1);
+    setActiveIdx((i) => (i + 1) % displayedImages.length);
+    setZoomed(false);
+  }, [displayedImages.length]);
+  const prev = useCallback(() => {
+    setActiveColorIdx(-1);
+    setActiveIdx((i) => (i - 1 + displayedImages.length) % displayedImages.length);
+    setZoomed(false);
+  }, [displayedImages.length]);
+
+  // Esc/стрелки в lightbox + блокировка скролла страницы.
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [lightboxOpen, closeLightbox, next, prev]);
+
+  // --------- Мобильная карусель: scroll-snap ---------
+  const mobileScrollRef = useRef<HTMLDivElement | null>(null);
+  const onMobileScroll = useCallback(() => {
+    const el = mobileScrollRef.current;
+    if (!el) return;
+    const i = Math.round(el.scrollLeft / el.clientWidth);
+    if (i !== activeIdx) setActiveIdx(i);
+  }, [activeIdx]);
+
+  if (displayedImages.length === 0) {
+    return (
+      <div
+        className="aspect-square"
+        style={{ background: "var(--card)" }}
+      />
+    );
+  }
 
   return (
-    <div>
-      {displayedMain ? (
-        <div
-          className="relative aspect-square overflow-hidden"
-          style={{ background: "var(--card)" }}
+    <>
+      {/* DESKTOP: миниатюры | главное фото */}
+      <div className="okiyo-gallery hidden md:grid">
+        <div className="okiyo-gallery__thumbs">
+          {displayedImages.map((img, idx) => (
+            <button
+              key={`${img.url}-${idx}`}
+              type="button"
+              onClick={() => selectThumb(idx)}
+              aria-label={`Показать фото ${idx + 1}`}
+              aria-pressed={idx === activeIdx}
+              data-active={idx === activeIdx}
+              className="okiyo-gallery__thumb"
+            >
+              <Image
+                src={img.thumb ?? img.url}
+                alt={img.alt}
+                fill
+                sizes="100px"
+                className="object-cover"
+              />
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={openLightbox}
+          className="okiyo-gallery__main"
+          aria-label="Открыть фото на весь экран"
         >
-          <Image
-            src={displayedMain.url}
-            alt={displayedMain.alt}
-            fill
-            priority
-            sizes="(min-width:1024px) 50vw, 100vw"
-            className="object-cover"
-          />
-        </div>
-      ) : (
+          {activeImage ? (
+            <Image
+              src={activeImage.url}
+              alt={activeImage.alt}
+              fill
+              priority
+              sizes="(min-width:1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          ) : null}
+          <span className="okiyo-gallery__zoom" aria-hidden>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.3-4.3M11 8v6M8 11h6" />
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      {/* MOBILE: snap-карусель + точки */}
+      <div className="md:hidden">
         <div
-          className="aspect-square"
-          style={{ background: "var(--card)" }}
-        />
-      )}
-
-      {allImages.length > 1 && !colorImage ? (
-        <div className="mt-3 grid grid-cols-4 gap-3">
-          {allImages.map((img, idx) => {
-            const src = img.thumb ?? img.url;
-            const isActive = idx === activeThumbIdx;
-            return (
-              <button
-                type="button"
-                key={`${img.url}-${idx}`}
-                onClick={() => {
-                  setActiveColorIdx(-1);
-                  setActiveThumbIdx(idx);
-                }}
-                aria-label={`Показать фото ${idx + 1}`}
-                aria-pressed={isActive}
-                className="relative aspect-square overflow-hidden transition"
-                style={{
-                  background: "var(--card)",
-                  outline: isActive
-                    ? "1px solid var(--ink)"
-                    : "1px solid var(--line)",
-                  outlineOffset: 0,
-                  cursor: "pointer",
-                }}
-              >
-                <Image
-                  src={src}
-                  alt={img.alt}
-                  fill
-                  sizes="20vw"
-                  className="object-cover"
-                />
-              </button>
-            );
-          })}
+          ref={mobileScrollRef}
+          onScroll={onMobileScroll}
+          className="okiyo-gallery__mobile no-scrollbar"
+        >
+          {displayedImages.map((img, idx) => (
+            <button
+              key={`${img.url}-${idx}`}
+              type="button"
+              onClick={openLightbox}
+              className="okiyo-gallery__mobile-slide"
+              aria-label={`Фото ${idx + 1}, тап чтобы увеличить`}
+            >
+              <Image
+                src={img.url}
+                alt={img.alt}
+                fill
+                priority={idx === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </button>
+          ))}
         </div>
-      ) : null}
+        {displayedImages.length > 1 ? (
+          <div className="okiyo-gallery__dots">
+            {displayedImages.map((_, i) => (
+              <span
+                key={i}
+                data-active={i === activeIdx}
+                aria-hidden
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
 
+      {/* Цветовые свотчи */}
       {safeColors.length > 0 ? (
         <div className="mt-7">
           <div
@@ -178,7 +273,10 @@ export function ProductGallery({
                 <button
                   type="button"
                   key={`${c.hex}-${idx}`}
-                  onClick={() => setActiveColorIdx(idx)}
+                  onClick={() => {
+                    setActiveColorIdx(idx);
+                    setActiveIdx(0);
+                  }}
                   aria-label={c.name}
                   aria-pressed={isActive}
                   title={
@@ -212,6 +310,75 @@ export function ProductGallery({
           </div>
         </div>
       ) : null}
-    </div>
+
+      {/* LIGHTBOX */}
+      {lightboxOpen && activeImage ? (
+        <div
+          className="okiyo-lightbox"
+          role="dialog"
+          aria-modal
+          aria-label="Просмотр фото"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeLightbox();
+          }}
+        >
+          <button
+            type="button"
+            className="okiyo-lightbox__close"
+            onClick={closeLightbox}
+            aria-label="Закрыть"
+          >
+            ✕
+          </button>
+
+          {displayedImages.length > 1 ? (
+            <>
+              <button
+                type="button"
+                className="okiyo-lightbox__nav okiyo-lightbox__nav--prev"
+                onClick={prev}
+                aria-label="Предыдущее фото"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="okiyo-lightbox__nav okiyo-lightbox__nav--next"
+                onClick={next}
+                aria-label="Следующее фото"
+              >
+                ›
+              </button>
+            </>
+          ) : null}
+
+          <div
+            className="okiyo-lightbox__stage"
+            data-zoomed={zoomed}
+            onClick={() => setZoomed((z) => !z)}
+          >
+            <Image
+              src={activeImage.url}
+              alt={activeImage.alt}
+              fill
+              priority
+              sizes="90vw"
+              className={zoomed ? "object-contain scale-150" : "object-contain"}
+              style={{
+                transition: "transform 0.3s ease",
+                cursor: zoomed ? "zoom-out" : "zoom-in",
+              }}
+            />
+          </div>
+
+          {displayedImages.length > 1 ? (
+            <div className="okiyo-lightbox__counter">
+              {Math.min(activeIdx + 1, displayedImages.length)} /{" "}
+              {displayedImages.length}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </>
   );
 }

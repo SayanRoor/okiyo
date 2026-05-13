@@ -498,6 +498,209 @@ img {
 }
 
 /* --------------------------------------------------------- */
+/* Premium-галерея товара: стек миниатюр + большое фото       */
+/* --------------------------------------------------------- */
+.okiyo-gallery {
+  grid-template-columns: 88px 1fr;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.okiyo-gallery__thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 720px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.okiyo-gallery__thumbs::-webkit-scrollbar {
+  width: 4px;
+}
+.okiyo-gallery__thumbs::-webkit-scrollbar-thumb {
+  background: var(--line);
+}
+
+.okiyo-gallery__thumb {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  background: var(--card);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: 1px solid var(--line);
+  outline-offset: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: outline-color 0.2s ease, opacity 0.2s ease;
+  opacity: 0.65;
+}
+
+.okiyo-gallery__thumb:hover {
+  opacity: 1;
+}
+
+.okiyo-gallery__thumb[data-active="true"] {
+  outline-color: var(--ink);
+  opacity: 1;
+}
+
+.okiyo-gallery__main {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background: var(--card);
+  border: 0;
+  padding: 0;
+  cursor: zoom-in;
+  overflow: hidden;
+  display: block;
+}
+
+.okiyo-gallery__zoom {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 999px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.okiyo-gallery__main:hover .okiyo-gallery__zoom {
+  transform: scale(1.06);
+}
+
+/* Mobile snap-carousel */
+.okiyo-gallery__mobile {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.okiyo-gallery__mobile-slide {
+  position: relative;
+  flex: 0 0 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--card);
+  border: 0;
+  padding: 0;
+  scroll-snap-align: start;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+
+.okiyo-gallery__dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.okiyo-gallery__dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.okiyo-gallery__dots span[data-active="true"] {
+  background: var(--ink);
+  transform: scale(1.2);
+}
+
+/* Lightbox */
+.okiyo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(8, 8, 8, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.okiyo-lightbox__stage {
+  position: relative;
+  width: min(92vw, 1100px);
+  height: min(86vh, 1100px);
+}
+
+.okiyo-lightbox__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 18px;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.okiyo-lightbox__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.okiyo-lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.okiyo-lightbox__nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.okiyo-lightbox__nav--prev {
+  left: 18px;
+}
+.okiyo-lightbox__nav--next {
+  right: 18px;
+}
+
+.okiyo-lightbox__counter {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* --------------------------------------------------------- */
 /* Спецификации товара — сетка под фото в стиле Toteme        */
 /* --------------------------------------------------------- */
 .okiyo-specs {
