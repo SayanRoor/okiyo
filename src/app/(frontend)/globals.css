@@ -501,9 +501,12 @@ img {
 /* Premium-галерея товара: стек миниатюр + большое фото       */
 /* --------------------------------------------------------- */
 .okiyo-gallery {
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: 96px minmax(0, 1fr);
   gap: 20px;
   align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .okiyo-gallery__thumbs {
@@ -553,15 +556,19 @@ img {
 .okiyo-gallery__main {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   background: transparent;
   border: 0;
   padding: 0;
+  margin: 0;
   cursor: zoom-in;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 520px;
+  box-sizing: border-box;
 }
 
 @media (min-width: 1024px) {
@@ -578,11 +585,12 @@ img {
 
 .okiyo-gallery__main-img {
   display: block;
-  width: auto;
+  width: 100%;
   height: auto;
   max-width: 100%;
   max-height: min(82vh, 920px);
   object-fit: contain;
+  margin: 0 auto;
   user-select: none;
 }
 
