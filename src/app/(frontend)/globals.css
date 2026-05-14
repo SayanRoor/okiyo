@@ -585,7 +585,9 @@ img {
 
 .okiyo-gallery__main-img {
   display: block;
-  width: 100%;
+  /* width/height auto + max-width/max-height — фото сохраняет
+     естественные пропорции, не растягивается и не сжимается. */
+  width: auto;
   height: auto;
   max-width: 100%;
   max-height: min(82vh, 920px);
