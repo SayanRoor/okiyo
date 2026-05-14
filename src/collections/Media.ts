@@ -12,7 +12,7 @@ export const Media: CollectionConfig = {
   upload: {
     staticDir:
       process.env.PAYLOAD_MEDIA_DIR ?? path.resolve(dirname, "../../media"),
-    mimeTypes: ["image/*"],
+    mimeTypes: ["image/*", "video/mp4", "video/webm", "video/quicktime"],
     imageSizes: [
       { name: "thumbnail", width: 400, height: 400, position: "centre" },
       { name: "card", width: 768, height: 768, position: "centre" },

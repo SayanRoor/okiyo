@@ -3,11 +3,23 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { mediaAlt, mediaUrl } from "@/lib/format";
+import {
+  isVideoMedia,
+  mediaAlt,
+  mediaMime,
+  mediaRawUrl,
+  mediaUrl,
+} from "@/lib/format";
 
-type ImageLike = {
+type MediaKind = "image" | "video";
+
+type GalleryItem = {
   url: string;
+  /** thumb-URL (для миниатюр и lightbox-counter). У видео нет — null. */
+  thumb: string | null;
   alt: string;
+  kind: MediaKind;
+  mime: string;
 };
 
 type Color = {
@@ -28,19 +40,21 @@ export type ProductGalleryProps = {
   colors?: Color[] | null;
 };
 
-function toHero(media: unknown, fallbackAlt: string): ImageLike | null {
-  const url = mediaUrl(media, "hero");
+function toItem(media: unknown, fallbackAlt: string): GalleryItem | null {
+  if (!media || typeof media !== "object") return null;
+  const isVideo = isVideoMedia(media);
+  // У видео нет image-sizes — берём исходный URL.
+  // У картинок — hero-resized, чтобы не качать оригинал.
+  const url = isVideo ? mediaRawUrl(media) : mediaUrl(media, "hero");
   if (!url) return null;
-  return { url, alt: mediaAlt(media) || fallbackAlt };
+  return {
+    url,
+    thumb: isVideo ? null : mediaUrl(media, "card") ?? mediaUrl(media, "hero"),
+    alt: mediaAlt(media) || fallbackAlt,
+    kind: isVideo ? "video" : "image",
+    mime: mediaMime(media),
+  };
 }
-
-function toThumb(media: unknown, fallbackAlt: string): ImageLike | null {
-  const url = mediaUrl(media, "card");
-  if (!url) return null;
-  return { url, alt: mediaAlt(media) || fallbackAlt };
-}
-
-type RichImage = ImageLike & { thumb: string | null };
 
 export function ProductGallery({
   productTitle,
@@ -49,15 +63,13 @@ export function ProductGallery({
   photos,
   colors,
 }: ProductGalleryProps) {
-  // --------- Сборка всех фотографий в один массив ---------
-  const allImages: RichImage[] = useMemo(() => {
-    const list: RichImage[] = [];
+  // --------- Сборка всех медиа в один массив ---------
+  const allItems: GalleryItem[] = useMemo(() => {
+    const list: GalleryItem[] = [];
     let counter = 0;
     const push = (media: unknown) => {
-      const full = toHero(media, `${productTitle} — ${++counter}`);
-      if (!full) return;
-      const thumb = toThumb(media, full.alt)?.url ?? null;
-      list.push({ ...full, thumb });
+      const it = toItem(media, `${productTitle} — ${++counter}`);
+      if (it) list.push(it);
     };
     push(mainImage);
     for (const m of photos ?? []) push(m);
@@ -71,23 +83,19 @@ export function ProductGallery({
   const [activeColorIdx, setActiveColorIdx] = useState<number>(
     initialColorIdx >= 0 ? initialColorIdx : -1,
   );
-  const colorImage =
+  const colorItem =
     activeColorIdx >= 0
-      ? toHero(
+      ? toItem(
           safeColors[activeColorIdx]?.image,
           `${productTitle} — ${safeColors[activeColorIdx]?.name}`,
         )
       : null;
 
-  // --------- Текущая активная картинка ---------
+  // --------- Активная позиция ---------
   const [activeIdx, setActiveIdx] = useState(0);
-
-  // Когда выбран цвет с фото — он перекрывает базовый стек.
-  const displayedImages: RichImage[] = colorImage
-    ? [{ ...colorImage, thumb: null }]
-    : allImages;
-  const activeImage =
-    displayedImages[Math.min(activeIdx, displayedImages.length - 1)];
+  const displayedItems: GalleryItem[] = colorItem ? [colorItem] : allItems;
+  const activeItem =
+    displayedItems[Math.min(activeIdx, displayedItems.length - 1)];
 
   const selectThumb = useCallback((i: number) => {
     setActiveColorIdx(-1);
@@ -106,16 +114,15 @@ export function ProductGallery({
 
   const next = useCallback(() => {
     setActiveColorIdx(-1);
-    setActiveIdx((i) => (i + 1) % displayedImages.length);
+    setActiveIdx((i) => (i + 1) % displayedItems.length);
     setZoomed(false);
-  }, [displayedImages.length]);
+  }, [displayedItems.length]);
   const prev = useCallback(() => {
     setActiveColorIdx(-1);
-    setActiveIdx((i) => (i - 1 + displayedImages.length) % displayedImages.length);
+    setActiveIdx((i) => (i - 1 + displayedItems.length) % displayedItems.length);
     setZoomed(false);
-  }, [displayedImages.length]);
+  }, [displayedItems.length]);
 
-  // Esc/стрелки в lightbox + блокировка скролла страницы.
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -132,7 +139,7 @@ export function ProductGallery({
     };
   }, [lightboxOpen, closeLightbox, next, prev]);
 
-  // --------- Мобильная карусель: scroll-snap ---------
+  // --------- Мобильная карусель ---------
   const mobileScrollRef = useRef<HTMLDivElement | null>(null);
   const onMobileScroll = useCallback(() => {
     const el = mobileScrollRef.current;
@@ -141,7 +148,7 @@ export function ProductGallery({
     if (i !== activeIdx) setActiveIdx(i);
   }, [activeIdx]);
 
-  if (displayedImages.length === 0) {
+  if (displayedItems.length === 0) {
     return (
       <div
         className="aspect-square"
@@ -152,46 +159,78 @@ export function ProductGallery({
 
   return (
     <>
-      {/* DESKTOP: миниатюры | главное фото */}
+      {/* DESKTOP: миниатюры | главное медиа */}
       <div className="okiyo-gallery hidden md:grid">
         <div className="okiyo-gallery__thumbs">
-          {displayedImages.map((img, idx) => (
+          {displayedItems.map((it, idx) => (
             <button
-              key={`${img.url}-${idx}`}
+              key={`${it.url}-${idx}`}
               type="button"
               onClick={() => selectThumb(idx)}
-              aria-label={`Показать фото ${idx + 1}`}
+              aria-label={`Показать ${it.kind === "video" ? "видео" : "фото"} ${idx + 1}`}
               aria-pressed={idx === activeIdx}
               data-active={idx === activeIdx}
               className="okiyo-gallery__thumb"
             >
-              <Image
-                src={img.thumb ?? img.url}
-                alt={img.alt}
-                fill
-                sizes="100px"
-                className="object-cover"
-              />
+              {it.kind === "video" ? (
+                <>
+                  <video
+                    src={it.url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="okiyo-gallery__thumb-media"
+                  />
+                  <span className="okiyo-gallery__play" aria-hidden>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                </>
+              ) : (
+                <Image
+                  src={it.thumb ?? it.url}
+                  alt={it.alt}
+                  fill
+                  sizes="100px"
+                  className="object-cover"
+                />
+              )}
             </button>
           ))}
         </div>
+
         <button
           type="button"
           onClick={openLightbox}
           className="okiyo-gallery__main"
-          aria-label="Открыть фото на весь экран"
+          aria-label={
+            activeItem?.kind === "video"
+              ? "Открыть видео на весь экран"
+              : "Открыть фото на весь экран"
+          }
         >
-          {activeImage ? (
-            // Обычный <img>, а не Image fill — высота определяется самим фото.
-            // Это премиум-паттерн (Saint Laurent / Mykita): каждый снимок
-            // показывается в своих пропорциях без обрезки и чёрных полей.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={activeImage.url}
-              alt={activeImage.alt}
-              className="okiyo-gallery__main-img"
-              loading="eager"
-            />
+          {activeItem ? (
+            activeItem.kind === "video" ? (
+              <video
+                key={activeItem.url}
+                src={activeItem.url}
+                className="okiyo-gallery__main-media"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls={false}
+              />
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={activeItem.url}
+                alt={activeItem.alt}
+                className="okiyo-gallery__main-media"
+                loading="eager"
+              />
+            )
           ) : null}
           <span className="okiyo-gallery__zoom" aria-hidden>
             <svg
@@ -216,32 +255,44 @@ export function ProductGallery({
           onScroll={onMobileScroll}
           className="okiyo-gallery__mobile no-scrollbar"
         >
-          {displayedImages.map((img, idx) => (
+          {displayedItems.map((it, idx) => (
             <button
-              key={`${img.url}-${idx}`}
+              key={`${it.url}-${idx}`}
               type="button"
               onClick={openLightbox}
               className="okiyo-gallery__mobile-slide"
-              aria-label={`Фото ${idx + 1}, тап чтобы увеличить`}
+              aria-label={
+                it.kind === "video"
+                  ? `Видео ${idx + 1}, тап чтобы открыть`
+                  : `Фото ${idx + 1}, тап чтобы увеличить`
+              }
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={img.url}
-                alt={img.alt}
-                loading={idx === 0 ? "eager" : "lazy"}
-                className="okiyo-gallery__mobile-img"
-              />
+              {it.kind === "video" ? (
+                <video
+                  src={it.url}
+                  className="okiyo-gallery__main-media"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls={false}
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={it.url}
+                  alt={it.alt}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  className="okiyo-gallery__main-media"
+                />
+              )}
             </button>
           ))}
         </div>
-        {displayedImages.length > 1 ? (
+        {displayedItems.length > 1 ? (
           <div className="okiyo-gallery__dots">
-            {displayedImages.map((_, i) => (
-              <span
-                key={i}
-                data-active={i === activeIdx}
-                aria-hidden
-              />
+            {displayedItems.map((_, i) => (
+              <span key={i} data-active={i === activeIdx} aria-hidden />
             ))}
           </div>
         ) : null}
@@ -313,12 +364,12 @@ export function ProductGallery({
       ) : null}
 
       {/* LIGHTBOX */}
-      {lightboxOpen && activeImage ? (
+      {lightboxOpen && activeItem ? (
         <div
           className="okiyo-lightbox"
           role="dialog"
           aria-modal
-          aria-label="Просмотр фото"
+          aria-label="Просмотр"
           onClick={(e) => {
             if (e.target === e.currentTarget) closeLightbox();
           }}
@@ -332,13 +383,13 @@ export function ProductGallery({
             ✕
           </button>
 
-          {displayedImages.length > 1 ? (
+          {displayedItems.length > 1 ? (
             <>
               <button
                 type="button"
                 className="okiyo-lightbox__nav okiyo-lightbox__nav--prev"
                 onClick={prev}
-                aria-label="Предыдущее фото"
+                aria-label="Предыдущее"
               >
                 ‹
               </button>
@@ -346,7 +397,7 @@ export function ProductGallery({
                 type="button"
                 className="okiyo-lightbox__nav okiyo-lightbox__nav--next"
                 onClick={next}
-                aria-label="Следующее фото"
+                aria-label="Следующее"
               >
                 ›
               </button>
@@ -356,22 +407,34 @@ export function ProductGallery({
           <div
             className="okiyo-lightbox__stage"
             data-zoomed={zoomed}
-            onClick={() => setZoomed((z) => !z)}
+            onClick={() => activeItem.kind === "image" && setZoomed((z) => !z)}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={activeImage.url}
-              alt={activeImage.alt}
-              className="okiyo-lightbox__img"
-              data-zoomed={zoomed}
-              style={{ cursor: zoomed ? "zoom-out" : "zoom-in" }}
-            />
+            {activeItem.kind === "video" ? (
+              <video
+                key={activeItem.url}
+                src={activeItem.url}
+                className="okiyo-lightbox__media"
+                autoPlay
+                loop
+                playsInline
+                controls
+              />
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={activeItem.url}
+                alt={activeItem.alt}
+                className="okiyo-lightbox__media"
+                data-zoomed={zoomed}
+                style={{ cursor: zoomed ? "zoom-out" : "zoom-in" }}
+              />
+            )}
           </div>
 
-          {displayedImages.length > 1 ? (
+          {displayedItems.length > 1 ? (
             <div className="okiyo-lightbox__counter">
-              {Math.min(activeIdx + 1, displayedImages.length)} /{" "}
-              {displayedImages.length}
+              {Math.min(activeIdx + 1, displayedItems.length)} /{" "}
+              {displayedItems.length}
             </div>
           ) : null}
         </div>
