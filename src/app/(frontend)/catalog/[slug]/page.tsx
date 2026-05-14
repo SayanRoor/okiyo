@@ -140,8 +140,8 @@ export default async function ProductPage({ params }: Params) {
           }
         />
 
-        {/* Инфо-колонка */}
-        <div>
+        {/* Инфо-колонка — sticky на десктопе */}
+        <div className="okiyo-product-info">
           <div className="eyebrow mb-3">{typeLabel}</div>
           <h1
             style={{
