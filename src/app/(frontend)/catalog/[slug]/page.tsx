@@ -169,13 +169,17 @@ export default async function ProductPage({ params }: Params) {
             </div>
           ) : null}
 
-          <div className="mt-6 flex items-baseline gap-3">
+          <div className="mt-8 flex items-baseline gap-3">
             <span
               style={{
-                fontFamily: "var(--font-serif), serif",
-                fontSize: 28,
-                fontWeight: 400,
+                // Цена в sans — convention для e-commerce. Cormorant
+                // у цены делает её декоративной, а должна быть функциональной.
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: 22,
+                fontWeight: 500,
+                letterSpacing: "0.02em",
                 color: "var(--ink)",
+                fontVariantNumeric: "tabular-nums",
               }}
             >
               {formatPrice(product.price)}
@@ -183,9 +187,11 @@ export default async function ProductPage({ params }: Params) {
             {product.oldPrice && product.oldPrice > product.price ? (
               <span
                 style={{
-                  fontSize: 16,
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: 15,
                   color: "var(--muted)",
                   textDecoration: "line-through",
+                  fontVariantNumeric: "tabular-nums",
                 }}
               >
                 {formatPrice(product.oldPrice)}
@@ -205,21 +211,24 @@ export default async function ProductPage({ params }: Params) {
           ) : null}
 
           {(() => {
-            // Берём только спеки с непустым значением (defaultValue ставит пустые слоты).
+            // Только спеки с непустым значением (defaultValue ставит пустые слоты).
             const specs = (product.specifications ?? []).filter(
               (s): s is { name: string; value: string } =>
                 Boolean(s?.name) && Boolean(s?.value && String(s.value).trim()),
             );
             if (specs.length === 0) return null;
             return (
-              <dl className="okiyo-specs mt-10">
-                {specs.map((s, i) => (
-                  <div key={i} className="okiyo-specs__cell">
-                    <dt className="okiyo-specs__label">{s.name}</dt>
-                    <dd className="okiyo-specs__value">{s.value}</dd>
-                  </div>
-                ))}
-              </dl>
+              <div className="mt-12">
+                <div className="eyebrow mb-5">Характеристики</div>
+                <dl className="okiyo-specs">
+                  {specs.map((s, i) => (
+                    <div key={i} className="okiyo-specs__cell">
+                      <dt className="okiyo-specs__label">{s.name}</dt>
+                      <dd className="okiyo-specs__value">{s.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             );
           })()}
 
@@ -236,7 +245,7 @@ export default async function ProductPage({ params }: Params) {
             </p>
           ) : null}
 
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-12 flex flex-wrap gap-3">
             {whatsapp ? (
               <a
                 className="btn btn-primary"
@@ -261,25 +270,20 @@ export default async function ProductPage({ params }: Params) {
 
           <div
             id="lead-form"
-            className="mt-10 p-6 scroll-mt-24"
+            className="mt-14 pt-10 scroll-mt-24"
             style={{
-              border: "1px solid var(--line)",
-              background: "var(--card)",
+              borderTop: "1px solid var(--line)",
             }}
           >
-            <div
-              style={{
-                fontFamily: "var(--font-serif), serif",
-                fontSize: 20,
-                fontWeight: 400,
-                color: "var(--ink)",
-              }}
-            >
-              Уточнить наличие
-            </div>
+            <div className="eyebrow mb-3">Уточнить наличие</div>
             <p
-              className="mt-1.5 mb-4"
-              style={{ fontSize: 13, color: "var(--muted)" }}
+              className="mb-5"
+              style={{
+                fontSize: 13,
+                color: "var(--muted)",
+                lineHeight: 1.6,
+                maxWidth: 360,
+              }}
             >
               Менеджер перезвонит, расскажет про доставку и примерку.
             </p>
