@@ -14,9 +14,39 @@ export const Media: CollectionConfig = {
       process.env.PAYLOAD_MEDIA_DIR ?? path.resolve(dirname, "../../media"),
     mimeTypes: ["image/*", "video/mp4", "video/webm", "video/quicktime"],
     imageSizes: [
-      { name: "thumbnail", width: 400, height: 400, position: "centre" },
-      { name: "card", width: 768, height: 768, position: "centre" },
-      { name: "hero", width: 1600, height: 900, position: "centre" },
+      // Миниатюры (стек слева на странице товара + админ-превью)
+      // — квадраты с cover, чтобы превью были полные.
+      {
+        name: "thumbnail",
+        width: 400,
+        height: 400,
+        position: "centre",
+        fit: "cover",
+      },
+      // Карточка каталога — тоже квадрат с cover.
+      {
+        name: "card",
+        width: 768,
+        height: 768,
+        position: "centre",
+        fit: "cover",
+      },
+      // Главное фото на странице товара — квадрат 1600×1600,
+      // fit: contain → фото целиком, прозрачный фон.
+      // Подложка var(--card) приходит с контейнера, тема-aware.
+      // Эквивалент Cloudinary: c_pad,ar_1:1,b_auto.
+      {
+        name: "hero",
+        width: 1600,
+        height: 1600,
+        position: "centre",
+        fit: "contain",
+        formatOptions: {
+          format: "webp",
+          options: { quality: 88 },
+        },
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      },
     ],
   },
   hooks: {

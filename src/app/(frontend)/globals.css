@@ -551,16 +551,19 @@ img {
 }
 
 /* Главное фото — строго квадратный контейнер 1:1.
-   Это стандарт премиум-каталогов (Apple, Aesop, Cubitts, Garrett Leight):
-   квадрат гарантирует единую визуальную массу всех товаров.
-   Горизонтальные и вертикальные снимки вписываются через object-contain. */
+   Это стандарт премиум-каталогов (Jacques Marie Mage, Garrett Leight,
+   Akila, Moscot, Ace & Tate, Warby Parker): квадрат гарантирует единую
+   визуальную массу всех товаров.
+   Sharp на бэке делает hero 1600×1600 fit:contain с прозрачным фоном.
+   Подложка var(--card) применяется на контейнере — тема-aware
+   (#ece7df днём, #161513 ночью), эквивалент Cloudinary c_pad,ar_1:1,b_auto. */
 .okiyo-gallery__main {
   position: relative;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   aspect-ratio: 1 / 1;
-  background: transparent;
+  background: var(--card);
   border: 0;
   padding: 0;
   margin: 0;
@@ -653,7 +656,7 @@ img {
   position: relative;
   flex: 0 0 100%;
   aspect-ratio: 1 / 1;
-  background: transparent;
+  background: var(--card);
   border: 0;
   padding: 0;
   scroll-snap-align: start;
