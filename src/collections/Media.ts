@@ -13,39 +13,49 @@ export const Media: CollectionConfig = {
     staticDir:
       process.env.PAYLOAD_MEDIA_DIR ?? path.resolve(dirname, "../../media"),
     mimeTypes: ["image/*", "video/mp4", "video/webm", "video/quicktime"],
+
+    // Smart 1:1 crop — встроенные инструменты Payload:
+    // 1. crop: true       — bbox-кропер в админке. Можно вручную обрезать
+    //                       перед генерацией imageSizes. Пресеты aspect-ratio
+    //                       подтягиваются автоматически из imageSizes ниже
+    //                       (1:1 берётся из hero/card/thumbnail).
+    // 2. focalPoint: true — точка-якорь поверх фото. Sharp использует её как
+    //                       gravity при cover-кропе. Дефолт — центр (50/50),
+    //                       что эквивалентно applyRecommendedCrop().
+    //                       Менеджер передвигает точку, чтобы центрировать
+    //                       на лице модели или на очках.
+    crop: true,
+    focalPoint: true,
+
     imageSizes: [
-      // Миниатюры (стек слева на странице товара + админ-превью)
-      // — квадраты с cover, чтобы превью были полные.
+      // Превью-миниатюры (стек слева на странице товара + admin grid).
+      // Квадрат, cover с focal-point.
       {
         name: "thumbnail",
         width: 400,
         height: 400,
         position: "centre",
-        fit: "cover",
       },
-      // Карточка каталога — тоже квадрат с cover.
+      // Карточка каталога — квадрат, cover с focal-point.
       {
         name: "card",
         width: 768,
         height: 768,
         position: "centre",
-        fit: "cover",
       },
-      // Главное фото на странице товара — квадрат 1600×1600,
-      // fit: contain → фото целиком, прозрачный фон.
-      // Подложка var(--card) приходит с контейнера, тема-aware.
-      // Эквивалент Cloudinary: c_pad,ar_1:1,b_auto.
+      // Главное фото на странице товара — квадрат 1600×1600.
+      // По дефолту fit: cover + focal point из Payload → Sharp обрезает
+      // вокруг точки субъекта. Это и есть "smart square" с центрированием.
+      // WebP для скорости загрузки.
       {
         name: "hero",
         width: 1600,
         height: 1600,
         position: "centre",
-        fit: "contain",
         formatOptions: {
           format: "webp",
-          options: { quality: 88 },
+          options: { quality: 90 },
         },
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
       },
     ],
   },
@@ -61,6 +71,14 @@ export const Media: CollectionConfig = {
           const base = fname.replace(/\.[a-z0-9]+$/i, "");
           data.alt = base || "OKIYO";
         }
+
+        // Smart Square default — если focal point не задан явно,
+        // ставим центр (50/50). Это applyRecommendedCrop() из ТЗ:
+        // largest possible 1:1 square с центрированной кропировкой.
+        // Менеджер может переместить точку в админке для face-aware crop.
+        if (typeof data.focalX !== "number") data.focalX = 50;
+        if (typeof data.focalY !== "number") data.focalY = 50;
+
         return data;
       },
     ],
