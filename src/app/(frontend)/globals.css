@@ -839,6 +839,73 @@ img {
   font-variant-numeric: tabular-nums;
 }
 
+/* --------------------------------------------------------- */
+/* Product accordion — для описания, materials и т.п.        */
+/* Паттерн Cubitts / Toteme / Saint Laurent.                */
+/* --------------------------------------------------------- */
+.okiyo-accordion {
+  border-top: 1px solid var(--line);
+}
+
+.okiyo-accordion + .okiyo-accordion {
+  /* Если несколько accordion подряд — без двойной границы */
+}
+
+.okiyo-accordion__summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  user-select: none;
+}
+
+.okiyo-accordion__summary::-webkit-details-marker {
+  display: none;
+}
+
+.okiyo-accordion__chevron {
+  display: inline-flex;
+  color: var(--muted);
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.okiyo-accordion[open] .okiyo-accordion__chevron {
+  transform: rotate(180deg);
+  color: var(--ink);
+}
+
+.okiyo-accordion__summary:hover .okiyo-accordion__chevron {
+  color: var(--ink);
+}
+
+.okiyo-accordion__body {
+  padding-bottom: 22px;
+  padding-right: 4px;
+  animation: okiyo-accordion-in 0.25s ease;
+}
+
+.okiyo-accordion__body p {
+  margin: 0 0 12px 0;
+}
+
+.okiyo-accordion__body p:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes okiyo-accordion-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Product page grid (галерея | инфо).
    Фото получает 1.5fr — это премиум-стандарт (Mykita ~58%, Cubitts ~60%).
    Info-колонка sticky: при скролле остаётся вверху, кнопки всегда видны. */

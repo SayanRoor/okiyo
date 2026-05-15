@@ -245,6 +245,39 @@ export default async function ProductPage({ params }: Params) {
             </p>
           ) : null}
 
+          {/* Полное описание — accordion в info-колонке, как у Cubitts /
+              Toteme / Saint Laurent. По дефолту свёрнут, чтобы info-колонка
+              не растягивалась и sticky-позиция корректно работала. */}
+          {product.description ? (
+            <details className="okiyo-accordion mt-10">
+              <summary className="okiyo-accordion__summary">
+                <span className="eyebrow">Описание</span>
+                <span className="okiyo-accordion__chevron" aria-hidden>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </span>
+              </summary>
+              <div
+                className="okiyo-accordion__body prose prose-neutral max-w-none"
+                style={{
+                  color: "var(--ink)",
+                  fontSize: 14,
+                  lineHeight: 1.75,
+                }}
+              >
+                <RichText data={product.description} />
+              </div>
+            </details>
+          ) : null}
+
           <div className="mt-12 flex flex-wrap gap-3">
             {whatsapp ? (
               <a
@@ -291,18 +324,6 @@ export default async function ProductPage({ params }: Params) {
           </div>
         </div>
       </div>
-
-      {product.description ? (
-        <section className="mt-16 max-w-3xl">
-          <div className="eyebrow mb-4">Описание</div>
-          <div
-            className="prose prose-neutral max-w-none"
-            style={{ color: "var(--ink)", fontSize: 15, lineHeight: 1.8 }}
-          >
-            <RichText data={product.description} />
-          </div>
-        </section>
-      ) : null}
 
       {related && related.docs.length > 0 ? (
         <section className="mt-20">
