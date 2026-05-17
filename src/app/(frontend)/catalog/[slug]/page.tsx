@@ -145,11 +145,15 @@ export default async function ProductPage({ params }: Params) {
           <div className="eyebrow mb-3">{typeLabel}</div>
           <h1
             style={{
-              fontFamily: "var(--font-serif), serif",
-              fontWeight: 300,
-              fontSize: "clamp(36px, 4.4vw, 56px)",
+              // Tenor Sans uppercase — echo логотипа OKIYO и значений спек.
+              // Saint Laurent / Mykita / Cubitts именно так делают название
+              // товара: единый brand voice, без декоративного Cormorant.
+              fontFamily: "var(--font-logo), 'Optima', sans-serif",
+              fontWeight: 400,
+              fontSize: "clamp(28px, 3.4vw, 40px)",
               lineHeight: 1,
-              letterSpacing: "-0.01em",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
               color: "var(--ink)",
             }}
           >
