@@ -6,13 +6,39 @@ export const Products: CollectionConfig = {
   slug: "products",
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "type", "price", "badge", "isPublished"],
+    // Поле order — первое, чтобы менеджер мог быстро видеть текущий порядок
+    // и сортировать список кликом на header колонки.
+    defaultColumns: ["order", "title", "type", "price", "badge", "isPublished"],
     listSearchableFields: ["title", "sku", "subtitle"],
   },
+  // Сортировка списка по умолчанию — по order asc.
+  defaultSort: "order",
   access: {
     read: () => true,
   },
   hooks: {
+    beforeChange: [
+      async ({ data, operation, req }) => {
+        // При создании нового товара — даём ему order = max+10, чтобы он
+        // встал в конец списка. Менеджер потом может перетащить выше через
+        // изменение поля order в sidebar.
+        if (operation === "create" && (data?.order ?? 0) === 0) {
+          try {
+            const last = await req.payload.find({
+              collection: "products",
+              sort: "-order",
+              limit: 1,
+              depth: 0,
+            });
+            const maxOrder = (last.docs[0] as { order?: number } | undefined)?.order ?? 0;
+            data.order = maxOrder + 10;
+          } catch {
+            data.order = 10;
+          }
+        }
+        return data;
+      },
+    ],
     beforeValidate: [
       ({ data }) => {
         if (!data) return data;
@@ -306,18 +332,24 @@ export const Products: CollectionConfig = {
               defaultValue: false,
               label: "Показать на главной",
             },
-            {
-              name: "order",
-              type: "number",
-              defaultValue: 0,
-              label: "Порядок сортировки",
-              admin: {
-                description: "Меньше — выше. Используется для drag-n-drop позднее.",
-              },
-            },
           ],
         },
       ],
+    },
+    // Поле order вынесено из вкладок в боковую панель — менеджер видит и
+    // меняет порядок без перехода в 'Публикация'.
+    {
+      name: "order",
+      type: "number",
+      defaultValue: 0,
+      label: "Порядок в каталоге",
+      admin: {
+        position: "sidebar",
+        description:
+          "Чем меньше число — тем выше товар. Шаг 10 (10, 20, 30…), чтобы потом было легко вставить между.",
+        step: 10,
+      },
+      index: true,
     },
   ],
 };
