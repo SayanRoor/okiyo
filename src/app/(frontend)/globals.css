@@ -509,20 +509,25 @@ img {
   max-width: 100%;
 }
 
+/* Стек миниатюр. Без жёсткой max-height — пусть растёт сколько фото у
+   товара. Scrollbar и padding-right убраны: тот тонкий серый прямоугольник
+   справа от последнего фото был именно резерв под scrollbar, который
+   рисовался даже когда скроллить не нужно. */
 .okiyo-gallery__thumbs {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 720px;
+  /* На больших каталогах фото (>10) ограничиваем высоту viewport,
+     но скрываем scrollbar — мягко доскролится pointerwheel'ом. */
+  max-height: 92vh;
   overflow-y: auto;
-  padding-right: 4px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
 .okiyo-gallery__thumbs::-webkit-scrollbar {
-  width: 4px;
-}
-.okiyo-gallery__thumbs::-webkit-scrollbar-thumb {
-  background: var(--line);
+  display: none; /* Chrome / Safari */
+  width: 0;
 }
 
 .okiyo-gallery__thumb {
