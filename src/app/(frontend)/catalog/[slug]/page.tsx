@@ -61,6 +61,7 @@ export default async function ProductPage({ params }: Params) {
     photos?: unknown[] | null;
     kit?: string | null;
     tryOnImage?: unknown;
+    enableTryOn?: boolean | null;
   };
 
   const settings = await p.findGlobal({ slug: "settings" });
@@ -70,6 +71,15 @@ export default async function ProductPage({ params }: Params) {
     product.tryOnImage && typeof product.tryOnImage === "object"
       ? ((product.tryOnImage as { url?: string | null }).url ?? null)
       : null;
+  // Кнопка примерки появляется ТОЛЬКО при двух условиях:
+  //  1) менеджер включил тоггл «Включить кнопку» в админке (enableTryOn = true)
+  //  2) загружено PNG оправы на прозрачном фоне (tryOnImage)
+  const tryOnEnabled = Boolean(product.enableTryOn) && Boolean(tryOnUrl);
+
+  // Проверяем lexical-описание на «реальное» содержимое.
+  // Пустой редактор сохраняет валидный JSON ({root:{children:[{type:'paragraph',children:[]}]}}),
+  // который truthy, но рендерится пустотой — поэтому проверяем структуру.
+  const hasRichDescription = hasLexicalContent(product.description);
 
   const typeLabel =
     product.type === "optic" ? "Оптические" : "Солнцезащитные";
@@ -257,10 +267,12 @@ export default async function ProductPage({ params }: Params) {
           ) : null}
 
           {/* Полное описание — accordion в info-колонке, как у Cubitts /
-              Toteme / Saint Laurent. По дефолту свёрнут, чтобы info-колонка
-              не растягивалась и sticky-позиция корректно работала. */}
-          {product.description ? (
-            <details className="okiyo-accordion mt-10">
+              Toteme / Saint Laurent. По умолчанию РАСКРЫТ (атрибут open),
+              чтобы менеджер сразу видел, что описание подцепилось, и клиент
+              мог прочитать ключевую информацию без лишних кликов. Свернуть
+              можно вручную — нативный <details>. */}
+          {hasRichDescription && product.description ? (
+            <details className="okiyo-accordion mt-10" open>
               <summary className="okiyo-accordion__summary">
                 <span className="eyebrow">Описание</span>
                 <span className="okiyo-accordion__chevron" aria-hidden>
@@ -307,7 +319,7 @@ export default async function ProductPage({ params }: Params) {
                   : "Заказать в WhatsApp"}
               </a>
             ) : null}
-            {tryOnUrl ? (
+            {tryOnEnabled && tryOnUrl ? (
               <TryOnButton
                 overlaySrc={tryOnUrl}
                 productTitle={product.title}
@@ -369,4 +381,30 @@ export default async function ProductPage({ params }: Params) {
       ) : null}
     </div>
   );
+}
+
+/**
+ * Проверяет, что lexical-JSON содержит непустое описание.
+ * Пустой редактор сохраняет `{root:{children:[{type:'paragraph',children:[]}]}}`
+ * — это truthy, но `<RichText>` нарисует пустоту. Прокручиваем дерево и ищем
+ * хотя бы один text-узел с непустым содержимым.
+ */
+function hasLexicalContent(data: unknown): boolean {
+  if (!data || typeof data !== "object") return false;
+  const root = (data as { root?: { children?: unknown[] } }).root;
+  if (!root || !Array.isArray(root.children) || root.children.length === 0) {
+    return false;
+  }
+  const walk = (nodes: unknown[]): boolean => {
+    for (const n of nodes) {
+      if (!n || typeof n !== "object") continue;
+      const node = n as { type?: string; text?: string; children?: unknown[] };
+      if (node.type === "text" && typeof node.text === "string" && node.text.trim()) {
+        return true;
+      }
+      if (Array.isArray(node.children) && walk(node.children)) return true;
+    }
+    return false;
+  };
+  return walk(root.children);
 }
