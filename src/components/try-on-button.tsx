@@ -16,6 +16,12 @@ type Props = {
   className?: string;
   /** Текст кнопки. */
   label?: string;
+  /**
+   * Автоматически открыть модалку при монтировании.
+   * Используется при переходе с главной по ссылке `/catalog/{slug}?try=1`,
+   * чтобы юзер сразу попал в примерку без лишнего клика.
+   */
+  defaultOpen?: boolean;
 };
 
 export function TryOnButton({
@@ -23,8 +29,9 @@ export function TryOnButton({
   productTitle,
   className = "btn btn-ghost",
   label = "Примерить онлайн",
+  defaultOpen = false,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
 
   return (
     <>

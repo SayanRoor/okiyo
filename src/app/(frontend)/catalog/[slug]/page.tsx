@@ -11,7 +11,12 @@ import { RichText } from "@payloadcms/richtext-lexical/react";
 
 export const dynamic = "force-dynamic";
 
-type Params = { params: Promise<{ slug: string }> };
+type Params = {
+  params: Promise<{ slug: string }>;
+  // `try=1` приходит из hero-кнопки на главной — автоматически открывает
+  // модалку виртуальной примерки, без лишнего клика.
+  searchParams?: Promise<{ try?: string }>;
+};
 
 export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
@@ -34,8 +39,10 @@ export async function generateMetadata({ params }: Params) {
   };
 }
 
-export default async function ProductPage({ params }: Params) {
+export default async function ProductPage({ params, searchParams }: Params) {
   const { slug } = await params;
+  const sp = searchParams ? await searchParams : undefined;
+  const autoOpenTryOn = sp?.try === "1";
   const p = await payload();
   const result = await p.find({
     collection: "products",
@@ -324,6 +331,7 @@ export default async function ProductPage({ params }: Params) {
                 overlaySrc={tryOnUrl}
                 productTitle={product.title}
                 label="Примерить онлайн"
+                defaultOpen={autoOpenTryOn}
               />
             ) : (
               <a className="btn btn-ghost" href="#lead-form">

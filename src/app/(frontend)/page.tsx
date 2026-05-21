@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const p = await payload();
-  const [settings, collection] = await Promise.all([
+  const [settings, collection, tryOnFirst] = await Promise.all([
     p.findGlobal({ slug: "settings" }),
     p.find({
       collection: "products",
@@ -18,7 +18,26 @@ export default async function HomePage() {
       sort: ["order", "-createdAt"],
       depth: 2,
     }),
+    // Первый товар, у которого включена виртуальная примерка И загружен PNG —
+    // на него ведёт hero-кнопка «Виртуальная примерка». Кнопка получает
+    // query `?try=1`, страница товара авто-открывает модалку.
+    p.find({
+      collection: "products",
+      where: {
+        and: [
+          { isPublished: { equals: true } },
+          { enableTryOn: { equals: true } },
+          { tryOnImage: { exists: true } },
+        ],
+      },
+      limit: 1,
+      sort: ["order", "-createdAt"],
+      depth: 0,
+    }),
   ]);
+
+  const tryOnSlug =
+    (tryOnFirst.docs[0] as { slug?: string } | undefined)?.slug ?? null;
 
   // Собираем слайды для карусели: сначала главное фото (если есть),
   // затем массив дополнительных. Дубли отсекаем по url.
@@ -91,13 +110,15 @@ export default async function HomePage() {
                 →
               </span>
             </Link>
-            <Link
-              href="/catalog"
-              className="btn btn-ghost"
-              title="Откройте модель и нажмите «Примерить онлайн»"
-            >
-              Виртуальная примерка
-            </Link>
+            {tryOnSlug ? (
+              <Link
+                href={`/catalog/${tryOnSlug}?try=1`}
+                className="btn btn-ghost"
+                title="Откроется модель с активной виртуальной примеркой"
+              >
+                Виртуальная примерка
+              </Link>
+            ) : null}
           </div>
         </div>
 
