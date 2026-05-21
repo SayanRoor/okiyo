@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
+import { TryOnButton } from "@/components/try-on-button";
 import { formatPrice, sanitizePhone } from "@/lib/format";
 import { payload } from "@/lib/payload";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -59,10 +60,16 @@ export default async function ProductPage({ params }: Params) {
     colors?: { hex: string; name?: string | null }[] | null;
     photos?: unknown[] | null;
     kit?: string | null;
+    tryOnImage?: unknown;
   };
 
   const settings = await p.findGlobal({ slug: "settings" });
   const whatsapp = sanitizePhone(settings.whatsapp);
+  // URL прозрачного PNG для виртуальной примерки (если менеджер загрузил)
+  const tryOnUrl =
+    product.tryOnImage && typeof product.tryOnImage === "object"
+      ? ((product.tryOnImage as { url?: string | null }).url ?? null)
+      : null;
 
   const typeLabel =
     product.type === "optic" ? "Оптические" : "Солнцезащитные";
@@ -300,9 +307,17 @@ export default async function ProductPage({ params }: Params) {
                   : "Заказать в WhatsApp"}
               </a>
             ) : null}
-            <a className="btn btn-ghost" href="#lead-form">
-              Перезвоните мне
-            </a>
+            {tryOnUrl ? (
+              <TryOnButton
+                overlaySrc={tryOnUrl}
+                productTitle={product.title}
+                label="Примерить онлайн"
+              />
+            ) : (
+              <a className="btn btn-ghost" href="#lead-form">
+                Перезвоните мне
+              </a>
+            )}
           </div>
 
           <div

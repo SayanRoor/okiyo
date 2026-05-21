@@ -91,8 +91,12 @@ export default async function HomePage() {
                 →
               </span>
             </Link>
-            <Link href="/contacts" className="btn btn-ghost">
-              Записаться на примерку
+            <Link
+              href="/catalog"
+              className="btn btn-ghost"
+              title="Откройте модель и нажмите «Примерить онлайн»"
+            >
+              Виртуальная примерка
             </Link>
           </div>
         </div>

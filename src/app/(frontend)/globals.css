@@ -845,6 +845,117 @@ img {
 }
 
 /* --------------------------------------------------------- */
+/* Virtual Try-On — fullscreen модалка                       */
+/* --------------------------------------------------------- */
+.vto {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(8, 8, 8, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.vto__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 18px;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.vto__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.vto__stage {
+  position: relative;
+  width: min(92vw, 1100px);
+  aspect-ratio: 4 / 3;
+  background: #000;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.vto__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Видео отрисовывается на canvas — самим видео-тегом не показываем,
+     но он нужен живым для MediaPipe. */
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vto__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.vto__status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  padding: 0 24px;
+}
+
+.vto__spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vto-spin 0.9s linear infinite;
+}
+
+@keyframes vto-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vto__caption {
+  margin-top: 18px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.vto__caption strong {
+  font-family: var(--font-logo), "Optima", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  margin-left: 4px;
+}
+
+/* --------------------------------------------------------- */
 /* Product accordion — для описания, materials и т.п.        */
 /* Паттерн Cubitts / Toteme / Saint Laurent.                */
 /* --------------------------------------------------------- */
