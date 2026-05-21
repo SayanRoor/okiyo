@@ -5,6 +5,7 @@ import * as migration_20260510_143000_redesign_fields from './20260510_143000_re
 import * as migration_20260511_180000_hero_carousel from './20260511_180000_hero_carousel';
 import * as migration_20260513_000000_products_rels from './20260513_000000_products_rels';
 import * as migration_20260514_000000_products_kit from './20260514_000000_products_kit';
+import * as migration_20260520_000000_products_try_on_image from './20260520_000000_products_try_on_image';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260514_000000_products_kit.up,
     down: migration_20260514_000000_products_kit.down,
     name: '20260514_000000_products_kit',
+  },
+  {
+    up: migration_20260520_000000_products_try_on_image.up,
+    down: migration_20260520_000000_products_try_on_image.down,
+    name: '20260520_000000_products_try_on_image',
   },
 ];
