@@ -357,69 +357,77 @@ img {
 }
 
 /* --------------------------------------------------------- */
-/* SOLD OUT — premium-паттерн (Toteme / Mykita / Cubitts)    */
-/* Карточка остаётся видимой (модельный ряд), фото           */
-/* десатурируется, поверх — спокойный чип «Sold out».        */
+/* SOLD OUT — premium-паттерн (Saint Laurent / Toteme /      */
+/* Cubitts / Mykita). Минимализм:                             */
+/*   1) Десатурация фото — глаз сразу видит «модель другая»  */
+/*   2) Микро-подпись в углу: пара слов в логотипном шрифте, */
+/*      без коробки, с тонкой нижней линией. Не загораживает */
+/*      товар — он остаётся главным героем кадра.            */
 /* --------------------------------------------------------- */
 .card-soldout img,
 .card-soldout svg {
-  filter: grayscale(0.85) brightness(0.92);
+  filter: grayscale(0.85) brightness(0.94);
   transition: filter 0.4s ease;
 }
 
 .card-soldout::after {
-  /* лёгкая «вуаль» поверх фото — добавляет ощущение «уже не для тебя» */
+  /* Очень лёгкая вуаль — едва заметная, чтобы тон совпал с цветом текста чипа */
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
   pointer-events: none;
 }
 
+/* Тёмная тема — наоборот, чуть затемняем */
+.theme-night .card-soldout::after {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* Угловая подпись на карточке. Не «штамп», а «гравировка»:
+   логотипный Tenor Sans, тонкая нижняя линия, никакого фона. */
 .chip-soldout {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 16px;
+  left: 16px;
   z-index: 5;
-  padding: 9px 22px;
-  background: rgba(255, 255, 255, 0.94);
+  padding: 0 0 3px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid currentColor;
   color: var(--ink);
-  border: 1px solid var(--line);
   font-family: var(--font-logo), "Optima", sans-serif;
-  font-size: 11px;
+  font-size: 9.5px;
   letter-spacing: 0.32em;
   text-transform: uppercase;
   font-weight: 400;
+  line-height: 1;
   pointer-events: none;
-  backdrop-filter: blur(2px);
   white-space: nowrap;
+  /* Лёгкая тень для читаемости поверх фото */
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
 }
 
-/* В тёмной теме чип сам тёмный — иначе сливается с белой плёнкой */
 .theme-night .chip-soldout {
-  background: rgba(20, 20, 20, 0.92);
-  color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
-.theme-night .card-soldout::after {
-  background: rgba(0, 0, 0, 0.32);
-}
-
-/* Большой чип SOLD OUT возле цены на странице товара */
+/* Inline-вариант для страницы товара — стоит рядом с ценой.
+   Тоже без коробки: подпись с подчёркиванием, в стиле eyebrow. */
 .chip-soldout--inline {
   position: static;
-  transform: none;
   display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
+  align-items: baseline;
+  padding: 0 0 3px 0;
+  margin-left: 4px;
   font-size: 10px;
-  letter-spacing: 0.28em;
-  background: var(--ink);
-  color: var(--bg);
-  border: 0;
-  backdrop-filter: none;
+  letter-spacing: 0.32em;
+  color: var(--ink);
+  background: transparent;
+  text-shadow: none;
+  /* Тонкая линия снизу — eyebrow-style */
+  border-bottom: 1px solid var(--ink);
 }
 
 /* OKIYO grid — 2 колонки на мобиле, 4 на широком экране */

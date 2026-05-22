@@ -56,8 +56,12 @@ export function ProductCard({ product }: { product: Product }) {
         }`}
         style={{ background: "var(--card)" }}
       >
-        {/* Метка */}
-        {badgeLabel ? (
+        {/* Метка в углу — SOLD OUT приоритетнее бренд-бейджа (NEW IN/LIMITED).
+            Если модель разобрана, не имеет смысла одновременно подсвечивать
+            её как «новинка». */}
+        {soldOut ? (
+          <span className="chip-soldout">Sold out</span>
+        ) : badgeLabel ? (
           <span
             className="absolute top-3.5 left-3.5 z-10 px-2 py-1"
             style={{
@@ -118,18 +122,14 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         ) : null}
 
-        {/* SOLD OUT — центральный premium-чип. Не диагональ, не «stamp» —
-            спокойная плашка в логотипном шрифте, как у Toteme/Mykita. */}
-        {soldOut ? (
-          <span className="chip-soldout" aria-label="Продано">
-            Sold out
-          </span>
-        ) : (
-          /* Hover-CTA — выезжает снизу. Подсказка пользователю, что карточка кликабельна. */
+        {/* Hover-CTA — выезжает снизу. Подсказка, что карточка кликабельна.
+            Не показываем на sold-out карточках: для них уже есть угловая
+            подпись, дублировать сигнал не нужно. */}
+        {!soldOut ? (
           <span className="card-cta" aria-hidden>
             Подробнее →
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* Meta */}
