@@ -30,12 +30,18 @@ export async function generateMetadata({ params }: Params) {
       ],
     },
     limit: 1,
+    depth: 1,
   });
   const product = r.docs[0];
   if (!product) return {};
+  const img = product.mainImage as { url?: string | null; sizes?: Record<string, { url?: string | null }> } | null | undefined;
+  const imgUrl = img?.sizes?.hero?.url ?? img?.url ?? null;
   return {
     title: product.title,
     description: product.shortDescription ?? undefined,
+    openGraph: imgUrl
+      ? { images: [{ url: imgUrl }] }
+      : undefined,
   };
 }
 
@@ -184,14 +190,56 @@ export default async function ProductPage({ params, searchParams }: Params) {
     : null;
 
   const soldOut = product.inStock === false;
+
+  // Абсолютный URL главного фото для JSON-LD (schema.org требует absolute).
+  const mainImgRaw = product.mainImage as { url?: string | null; sizes?: Record<string, { url?: string | null }> } | null | undefined;
+  const mainImgAbsUrl = (() => {
+    const raw = mainImgRaw?.sizes?.hero?.url ?? mainImgRaw?.url ?? null;
+    if (!raw) return null;
+    if (raw.startsWith("http")) return raw;
+    const base = process.env.PAYLOAD_PUBLIC_SERVER_URL ?? "https://okiyo.kz";
+    return `${base}${raw}`;
+  })();
+  const siteUrl = process.env.PAYLOAD_PUBLIC_SERVER_URL ?? "https://okiyo.kz";
   const waText = encodeURIComponent(
     soldOut
       ? `Здравствуйте! Хочу узнать когда модель ${product.title} снова появится в наличии.`
       : `Здравствуйте! Интересует модель ${product.title} (${formatPrice(product.price)}).`,
   );
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    ...(product.shortDescription ? { description: product.shortDescription } : {}),
+    ...(mainImgAbsUrl ? { image: mainImgAbsUrl } : {}),
+    brand: { "@type": "Brand", name: "OKIYO" },
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: "KZT",
+      availability: soldOut
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      url: `${siteUrl}/catalog/${product.slug}`,
+      seller: { "@type": "Organization", name: "OKIYO" },
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Каталог", item: `${siteUrl}/catalog` },
+      { "@type": "ListItem", position: 3, name: product.title },
+    ],
+  };
+
   return (
     <div className="container-x py-10 md:py-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <nav
         className="text-sm mb-8 flex flex-wrap gap-1.5"
         style={{ color: "var(--muted)" }}
@@ -292,7 +340,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
             ) : null}
             {soldOut ? (
               <span className="chip-soldout chip-soldout--inline">
-                Sold out
+                Нет в наличии
               </span>
             ) : null}
           </div>

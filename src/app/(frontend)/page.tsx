@@ -74,8 +74,18 @@ export default async function HomePage() {
     (settings.trustBadges as { id?: string | null; text: string }[] | undefined) ??
     [];
 
+  const siteUrl = process.env.PAYLOAD_PUBLIC_SERVER_URL ?? "https://okiyo.kz";
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "OKIYO",
+    url: siteUrl,
+    description: heroSubtitle,
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
       {/* HERO */}
       <section className="container-x okiyo-hero py-12 md:py-20">
         <div className="min-w-0">
