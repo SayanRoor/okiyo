@@ -83,6 +83,67 @@ export default async function ProductPage({ params, searchParams }: Params) {
   //  2) загружено PNG оправы на прозрачном фоне (tryOnImage)
   const tryOnEnabled = Boolean(product.enableTryOn) && Boolean(tryOnUrl);
 
+  // Все модели с активной VTO — для боковой карусели внутри модалки,
+  // чтобы юзер мог переключаться между оправами не выходя из примерки.
+  // Если есть текущая модель — она первая в списке (activated by default).
+  type VtoFrame = {
+    id: number | string;
+    slug: string;
+    title: string;
+    overlaySrc: string;
+    thumbSrc?: string | null;
+    price?: number | null;
+  };
+  let tryOnFrames: VtoFrame[] = [];
+  if (tryOnEnabled) {
+    const all = await p.find({
+      collection: "products",
+      where: {
+        and: [
+          { isPublished: { equals: true } },
+          { enableTryOn: { equals: true } },
+          { tryOnImage: { exists: true } },
+        ],
+      },
+      limit: 30,
+      sort: ["order", "-createdAt"],
+      depth: 1,
+    });
+    const raw: VtoFrame[] = all.docs
+      .map((d) => {
+        const doc = d as typeof d & {
+          tryOnImage?: unknown;
+          mainImage?: unknown;
+        };
+        const overlay =
+          doc.tryOnImage && typeof doc.tryOnImage === "object"
+            ? ((doc.tryOnImage as { url?: string | null }).url ?? null)
+            : null;
+        if (!overlay) return null;
+        const main =
+          doc.mainImage && typeof doc.mainImage === "object"
+            ? ((doc.mainImage as { sizes?: { thumbnail?: { url?: string } }; url?: string })
+                .sizes?.thumbnail?.url ??
+              (doc.mainImage as { url?: string }).url ??
+              null)
+            : null;
+        return {
+          id: doc.id,
+          slug: doc.slug,
+          title: doc.title,
+          overlaySrc: overlay,
+          thumbSrc: main,
+          price: doc.price ?? null,
+        } as VtoFrame;
+      })
+      .filter((x): x is VtoFrame => x !== null);
+
+    // Текущий товар — первым, остальные сохраняют свой order.
+    const cur = raw.find((f) => f.id === product.id);
+    const others = raw.filter((f) => f.id !== product.id);
+    tryOnFrames = cur ? [cur, ...others] : raw;
+  }
+
   // Проверяем lexical-описание на «реальное» содержимое.
   // Пустой редактор сохраняет валидный JSON ({root:{children:[{type:'paragraph',children:[]}]}}),
   // который truthy, но рендерится пустотой — поэтому проверяем структуру.
@@ -339,10 +400,10 @@ export default async function ProductPage({ params, searchParams }: Params) {
               </a>
             ) : null}
 
-            {tryOnEnabled && tryOnUrl ? (
+            {tryOnEnabled && tryOnFrames.length > 0 ? (
               <TryOnButton
-                overlaySrc={tryOnUrl}
-                productTitle={product.title}
+                frames={tryOnFrames}
+                initialId={product.id}
                 label="Примерить онлайн"
                 defaultOpen={autoOpenTryOn}
               />

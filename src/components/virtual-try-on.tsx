@@ -1,43 +1,47 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
- * Виртуальная примерка очков. Современный 6DoF-подход:
+ * Виртуальная примерка очков — 6DoF трекинг через MediaPipe Face Landmarker
+ * + рендер оправы как `<img>` с CSS 3D transform.
  *
- *   камера (getUserMedia)
- *      ↓ video отзеркален CSS-ом (scaleX(-1))
+ * Стек:
+ *   getUserMedia → video (mirrored via scaleX(-1))
  *   MediaPipe FaceLandmarker (478 точек + facialTransformationMatrixes)
- *      ↓ выдаёт 4×4 матрицу позы головы (yaw/pitch/roll + translation)
+ *     → выдаёт 4×4 матрицу позы головы (yaw/pitch/roll)
  *   <img> с PNG оправы
- *      ↓ позиционируется + поворачивается через CSS `transform` (translate3d + rotate3d)
- *   GPU compositor (hardware accelerated)
+ *     → translate3d + rotateZ/Y/X через GPU compositor
  *
- * Почему не canvas.drawImage с rotate:
- *  • Canvas 2D даёт только roll (вращение в плоскости экрана). Поворот головы
- *    в стороны (yaw) и наклон вперёд-назад (pitch) — невозможны.
- *  • CSS 3D transform на <img> делает true-perspective через GPU,
- *    плавнее (60+ fps на mobile) и без блюра при ресайзе.
- *
- * Зачем выходная матрица MediaPipe:
- *  • Точно как у Snapchat / Spectacles / Cubitts: чтобы оправа поворачивалась
- *    при повороте головы. Без неё «примерка» — это плоский стикер.
- *
- * Лоу-пасс фильтр (lerp с α=0.5) убирает дрожь между кадрами без заметного
- * лага. Альтернатива (1€-filter) даёт чуть лучше, но сложнее в коде.
+ * UX:
+ *   Внизу — горизонтальная карусель всех моделей с VTO.
+ *   Клик по превью мгновенно меняет оправу, MediaPipe не пересоздаётся.
+ *   Пользователь может «примерить» весь каталог не выходя из модалки —
+ *   как у Warby Parker / Cubitts / Ace & Tate.
  */
 
-type Props = {
-  /** URL прозрачного PNG оправы (анфас, ширина ~1500px). */
+export type VtoFrame = {
+  id: number | string;
+  slug: string;
+  title: string;
+  /** URL прозрачного PNG оправы. */
   overlaySrc: string;
-  /** Название модели — для подписи в модалке. */
-  productTitle: string;
+  /** Превью для боковой карусели (mainImage товара). */
+  thumbSrc?: string | null;
+  /** Цена для подписи. */
+  price?: number | null;
+};
+
+type Props = {
+  /** Все модели, между которыми можно переключаться. */
+  frames: VtoFrame[];
+  /** Какую модель показать первой при открытии. */
+  initialId?: number | string;
   /** Колбэк закрытия. */
   onClose: () => void;
 };
 
-// Индексы из 478-точечной схемы Face Landmarker.
-// https://github.com/google-ai-edge/mediapipe/blob/master/mediapipe/modules/face_geometry/data/canonical_face_model_uv_visualization.png
+// Индексы из 478-точечной схемы MediaPipe Face Landmarker.
 const LEFT_EYE_OUTER = 33;
 const RIGHT_EYE_OUTER = 263;
 
@@ -61,7 +65,12 @@ type Landmarker = {
   close?: () => void;
 };
 
-export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
+function formatPriceKz(p?: number | null): string | null {
+  if (typeof p !== "number") return null;
+  return new Intl.NumberFormat("ru-KZ").format(p) + " ₸";
+}
+
+export function VirtualTryOn({ frames, initialId, onClose }: Props) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const overlayRef = useRef<HTMLImageElement | null>(null);
@@ -76,6 +85,15 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     rz: 0,
     init: false,
   });
+
+  // Активный фрейм — состояние модалки.
+  const [currentId, setCurrentId] = useState<number | string>(
+    initialId ?? frames[0]?.id,
+  );
+  const current = useMemo(
+    () => frames.find((f) => f.id === currentId) ?? frames[0],
+    [frames, currentId],
+  );
 
   const [status, setStatus] = useState<
     "loading" | "ready" | "no-camera" | "no-face" | "error"
@@ -115,8 +133,6 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     try {
       result = lm.detectForVideo(video, performance.now());
     } catch (e) {
-      // Иногда detectForVideo бросает, если video размер изменился — просто
-      // пропускаем кадр.
       void e;
       rafRef.current = requestAnimationFrame(tick);
       return;
@@ -132,7 +148,6 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     setStatus("ready");
 
     const f = faces[0];
-    // X отзеркаливаем — видео показано с scaleX(-1).
     const lx = (1 - f[LEFT_EYE_OUTER].x) * w;
     const ly = f[LEFT_EYE_OUTER].y * h;
     const rx = (1 - f[RIGHT_EYE_OUTER].x) * w;
@@ -142,31 +157,21 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     const cy = (ly + ry) / 2;
     const eyeDist = Math.hypot(rx - lx, ry - ly);
 
-    // Ширина оправы = 1.5 × расстояние между внешними углами глаз.
-    // Это стандартная пропорция в оптике (PD/«междузрачковое» × 1.45–1.55).
     const overlayW = eyeDist * 1.5;
     const aspect = overlay.naturalHeight / overlay.naturalWidth || 0.32;
 
-    // 2D-roll из линии глаз — точнее, чем извлекать roll из матрицы при
-    // зеркалировании.
     const roll = Math.atan2(ry - ly, rx - lx);
 
-    // 3D-углы из transformation matrix (column-major 4×4 от MediaPipe).
-    // Yaw (поворот головы влево-вправо) и pitch (кивок) — позволяют оправе
-    // следовать за поворотами головы, а не «прилипать» плоско ко лбу.
     const M = result.facialTransformationMatrixes?.[0]?.data;
     let yaw = 0;
     let pitch = 0;
     if (M && M.length === 16) {
-      // Mirror yaw — видео зеркальное.
       yaw = -Math.atan2(M[2], M[10]);
       pitch = Math.atan2(-M[6], Math.hypot(M[2], M[10]));
-      // Limit, чтобы при сильном повороте оправа не «уплывала».
       yaw = Math.max(-0.9, Math.min(0.9, yaw));
       pitch = Math.max(-0.7, Math.min(0.7, pitch));
     }
 
-    // Lowpass smoothing — убирает дрожь.
     const s = smoothRef.current;
     const a = s.init ? 0.5 : 1;
     s.x += (cx - s.x) * a;
@@ -178,7 +183,6 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     s.init = true;
 
     const sh = s.scale * aspect;
-    // Чуть выше середины глаз — переносица «садит» оправу.
     const yShift = -sh * 0.07;
 
     overlay.style.width = `${s.scale}px`;
@@ -196,7 +200,6 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     setStatus("loading");
     setErrMsg(null);
 
-    // 1. Камера первым шагом — если откажут, нет смысла качать 12МБ модели.
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -234,16 +237,13 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     try {
       await video.play();
     } catch (e) {
-      // Autoplay policy в Safari может ругнуться, но playsInline+muted решает
       void e;
     }
 
-    // 2. MediaPipe — ленивая загрузка.
     try {
       const { FaceLandmarker, FilesetResolver } = await import(
         "@mediapipe/tasks-vision"
       );
-      // WASM с того же CDN, что и npm-пакет — версии должны совпадать.
       const resolver = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm",
       );
@@ -272,7 +272,6 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
     }
   }, [tick]);
 
-  // ---- Auto-start + cleanup ----
   useEffect(() => {
     startCamera();
     return () => {
@@ -283,6 +282,19 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
       landmarkerRef.current?.close?.();
     };
   }, [startCamera]);
+
+  // ---- Смена фрейма: ребутимся в плавный «крутой» переход через короткий fade ----
+  const switchFrame = useCallback(
+    (id: number | string) => {
+      if (id === currentId) return;
+      setCurrentId(id);
+      // Сбрасываем «scale» в smoothRef, чтобы при разной aspect ratio оправа
+      // пересчиталась с нуля без рывка между размерами.
+      const overlay = overlayRef.current;
+      if (overlay) overlay.style.opacity = "0";
+    },
+    [currentId],
+  );
 
   return (
     <div
@@ -313,7 +325,8 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
         />
         <img
           ref={overlayRef}
-          src={overlaySrc}
+          key={current?.id}
+          src={current?.overlaySrc}
           alt=""
           className="vto__overlay"
           crossOrigin="anonymous"
@@ -397,12 +410,60 @@ export function VirtualTryOn({ overlaySrc, productTitle, onClose }: Props) {
         ) : null}
       </div>
 
+      {/* Капшен — название текущей модели + цена */}
       <div className="vto__caption">
-        Виртуальная примерка · <strong>{productTitle}</strong>
+        <strong>{current?.title}</strong>
+        {formatPriceKz(current?.price) ? (
+          <span className="vto__caption-price">
+            {formatPriceKz(current?.price)}
+          </span>
+        ) : null}
       </div>
-      <div className="vto__hint">
-        Поверните голову — оправа повторит движение
-      </div>
+
+      {/* Карусель моделей — клик меняет оправу мгновенно */}
+      {frames.length > 1 ? (
+        <div className="vto__rail" role="tablist" aria-label="Выбор модели">
+          {frames.map((f) => {
+            const active = f.id === currentId;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                aria-label={`Примерить ${f.title}`}
+                title={f.title}
+                className={`vto__thumb${active ? " vto__thumb--active" : ""}`}
+                onClick={() => switchFrame(f.id)}
+              >
+                {f.thumbSrc ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={f.thumbSrc} alt="" loading="lazy" />
+                ) : (
+                  <span className="vto__thumb-fallback">
+                    {f.title.slice(0, 2)}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="vto__hint">
+          Поверните голову — оправа повторит движение
+        </div>
+      )}
+
+      {/* Ссылка «купить эту модель» — открыть страницу товара */}
+      {current ? (
+        <a
+          href={`/catalog/${current.slug}`}
+          className="vto__buy"
+          onClick={onClose}
+        >
+          Перейти к модели →
+        </a>
+      ) : null}
     </div>
   );
 }
