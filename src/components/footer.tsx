@@ -65,7 +65,7 @@ export function Footer({ settings }: { settings: Settings }) {
           <FooterCol title="Магазин">
             <FootLink href="/catalog">Каталог</FootLink>
             <FootLink href="/catalog?type=sun">Солнцезащитные</FootLink>
-            <FootLink href="/catalog?type=optic">Оптические</FootLink>
+            <FootLink href="/catalog?type=optic">Имиджевые</FootLink>
             <FootLink href="/contacts">Записаться на примерку</FootLink>
           </FooterCol>
 

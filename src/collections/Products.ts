@@ -110,7 +110,7 @@ export const Products: CollectionConfig = {
               defaultValue: "sun",
               options: [
                 { label: "Солнцезащитные", value: "sun" },
-                { label: "Оптические", value: "optic" },
+                { label: "Имиджевые", value: "optic" },
               ],
               admin: {
                 description: "Используется для фильтра в каталоге",

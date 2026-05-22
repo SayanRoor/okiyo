@@ -150,7 +150,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
   const hasRichDescription = hasLexicalContent(product.description);
 
   const typeLabel =
-    product.type === "optic" ? "Оптические" : "Солнцезащитные";
+    product.type === "optic" ? "Имиджевые" : "Солнцезащитные";
 
   // Список похожих — приоритетно по type, иначе по category.
   type RelatedFilter = { type: { equals: string } } | { category: { equals: number } };

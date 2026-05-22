@@ -144,7 +144,7 @@ export function CollectionGrid({
               data-active={filter === "optic"}
               onClick={() => pick("optic")}
             >
-              Оптические
+              Имиджевые
             </button>
           </div>
           <div style={{ fontSize: 12, color: "var(--muted)" }}>

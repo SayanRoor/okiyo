@@ -89,7 +89,7 @@ export function Header({
             Солнцезащитные
           </Link>
           <Link href="/catalog?type=optic" className="hover:opacity-60 transition-opacity">
-            Оптические
+            Имиджевые
           </Link>
           <Link href="/contacts" className="hover:opacity-60 transition-opacity">
             О бренде
