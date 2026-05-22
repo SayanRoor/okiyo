@@ -56,7 +56,9 @@ export function HeroSlideshow({
             alt={s.alt}
             fill
             priority={i === 0}
-            sizes="(min-width:1100px) 40vw, 100vw"
+            // Десктоп: image-колонка ~54vw (image-forward grid 1 : 1.15)
+            // Мобила: фото на всю ширину
+            sizes="(min-width:1024px) 54vw, 100vw"
             className="object-cover"
           />
         </div>

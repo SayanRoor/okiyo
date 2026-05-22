@@ -482,30 +482,39 @@ img {
   }
 }
 
-/* Hero — на мобиле колонкой, на десктопе 2 колонки */
+/* Hero — на мобиле колонкой, на десктопе 2 колонки.
+   Соотношение image-forward (1fr : 1.15fr): фото — герой кадра,
+   текст — подпись. Так у Toteme / Loewe / Mykita / Cubitts. */
 .okiyo-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
+  gap: 32px;
   align-items: center;
 }
 
 @media (min-width: 1024px) {
   .okiyo-hero {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: 80px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 56px;
   }
 }
 
-/* Hero-визуал блок (квадрат с акцентом) */
+/* Hero-визуал — портретный 4:5 на десктопе (как Instagram-портрет),
+   на мобиле сжимаем до 5:6, чтобы экран не «съедал» весь hero фотой. */
 .hero-visual {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 5 / 6;
   background: var(--card);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 1024px) {
+  .hero-visual {
+    aspect-ratio: 4 / 5;
+  }
 }
 
 /* Hero-слайдшоу — занимает весь блок hero-visual */

@@ -77,25 +77,29 @@ export default async function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="container-x okiyo-hero py-16 md:py-24">
+      <section className="container-x okiyo-hero py-12 md:py-20">
         <div className="min-w-0">
-          <div className="eyebrow mb-7">{heroEyebrow}</div>
+          <div className="eyebrow mb-6">{heroEyebrow}</div>
           <h1
             style={{
               fontFamily: "var(--font-serif), serif",
               fontWeight: 300,
-              lineHeight: 0.95,
-              letterSpacing: "-0.02em",
-              fontSize: "clamp(56px, 8vw, 108px)",
+              // Чуть «дышим» в строке — 0.95 слишком плотно для serif
+              lineHeight: 1.02,
+              // -0.02em рубил буквы; -0.015 безопаснее для разных слов
+              letterSpacing: "-0.015em",
+              // 108px max был «крик». 84px — спокойный premium-tier
+              // (Saint Laurent ~72px, Loewe ~88px, Toteme ~56px)
+              fontSize: "clamp(44px, 6.2vw, 84px)",
               color: "var(--ink)",
             }}
           >
             {renderTitle}
           </h1>
           <p
-            className="mt-9"
+            className="mt-7"
             style={{
-              maxWidth: 380,
+              maxWidth: 420,
               color: "var(--muted)",
               fontSize: 14,
               lineHeight: 1.7,
@@ -103,7 +107,7 @@ export default async function HomePage() {
           >
             {heroSubtitle}
           </p>
-          <div className="mt-10 flex gap-3 flex-wrap">
+          <div className="mt-9 flex gap-3 flex-wrap">
             <Link href={heroCtaHref} className="btn btn-primary">
               <span>{heroCtaLabel}</span>
               <span className="arrow" aria-hidden>
