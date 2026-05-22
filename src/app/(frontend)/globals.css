@@ -356,6 +356,72 @@ img {
   transform: translate(-50%, 0);
 }
 
+/* --------------------------------------------------------- */
+/* SOLD OUT — premium-паттерн (Toteme / Mykita / Cubitts)    */
+/* Карточка остаётся видимой (модельный ряд), фото           */
+/* десатурируется, поверх — спокойный чип «Sold out».        */
+/* --------------------------------------------------------- */
+.card-soldout img,
+.card-soldout svg {
+  filter: grayscale(0.85) brightness(0.92);
+  transition: filter 0.4s ease;
+}
+
+.card-soldout::after {
+  /* лёгкая «вуаль» поверх фото — добавляет ощущение «уже не для тебя» */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+.chip-soldout {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  padding: 9px 22px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-family: var(--font-logo), "Optima", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 400;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+  white-space: nowrap;
+}
+
+/* В тёмной теме чип сам тёмный — иначе сливается с белой плёнкой */
+.theme-night .chip-soldout {
+  background: rgba(20, 20, 20, 0.92);
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.theme-night .card-soldout::after {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* Большой чип SOLD OUT возле цены на странице товара */
+.chip-soldout--inline {
+  position: static;
+  transform: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  background: var(--ink);
+  color: var(--bg);
+  border: 0;
+  backdrop-filter: none;
+}
+
 /* OKIYO grid — 2 колонки на мобиле, 4 на широком экране */
 .okiyo-grid {
   display: grid;

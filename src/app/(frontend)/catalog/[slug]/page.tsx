@@ -122,8 +122,11 @@ export default async function ProductPage({ params, searchParams }: Params) {
       })
     : null;
 
+  const soldOut = product.inStock === false;
   const waText = encodeURIComponent(
-    `Здравствуйте! Интересует модель ${product.title} (${formatPrice(product.price)}).`,
+    soldOut
+      ? `Здравствуйте! Хочу узнать когда модель ${product.title} снова появится в наличии.`
+      : `Здравствуйте! Интересует модель ${product.title} (${formatPrice(product.price)}).`,
   );
 
   return (
@@ -197,7 +200,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
             </div>
           ) : null}
 
-          <div className="mt-8 flex items-baseline gap-3">
+          <div className="mt-8 flex items-baseline gap-3 flex-wrap">
             <span
               style={{
                 // Цена в sans — convention для e-commerce. Cormorant
@@ -206,13 +209,14 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 fontSize: 22,
                 fontWeight: 500,
                 letterSpacing: "0.02em",
-                color: "var(--ink)",
+                color: soldOut ? "var(--muted)" : "var(--ink)",
                 fontVariantNumeric: "tabular-nums",
+                textDecoration: soldOut ? "line-through" : undefined,
               }}
             >
               {formatPrice(product.price)}
             </span>
-            {product.oldPrice && product.oldPrice > product.price ? (
+            {!soldOut && product.oldPrice && product.oldPrice > product.price ? (
               <span
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
@@ -223,6 +227,11 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 }}
               >
                 {formatPrice(product.oldPrice)}
+              </span>
+            ) : null}
+            {soldOut ? (
+              <span className="chip-soldout chip-soldout--inline">
+                Sold out
               </span>
             ) : null}
           </div>
@@ -309,23 +318,27 @@ export default async function ProductPage({ params, searchParams }: Params) {
           ) : null}
 
           <div className="mt-12 flex flex-wrap gap-3">
-            {whatsapp ? (
+            {soldOut ? (
+              /* SOLD OUT — основной CTA меняется на «уведомить о поступлении».
+                 Цель не потерять интерес: модель разобрана → лид-форма ниже. */
+              <a className="btn btn-primary" href="#lead-form">
+                <span>Сообщить о поступлении</span>
+                <span className="arrow" aria-hidden>
+                  →
+                </span>
+              </a>
+            ) : whatsapp ? (
               <a
                 className="btn btn-primary"
                 href={`https://wa.me/${whatsapp}?text=${waText}`}
                 target="_blank"
                 rel="noreferrer"
                 aria-label={`Заказать ${product.title} в WhatsApp`}
-                style={{
-                  opacity: product.inStock === false ? 0.55 : 1,
-                  pointerEvents: product.inStock === false ? "none" : "auto",
-                }}
               >
-                {product.inStock === false
-                  ? "Нет в наличии"
-                  : "Заказать в WhatsApp"}
+                Заказать в WhatsApp
               </a>
             ) : null}
+
             {tryOnEnabled && tryOnUrl ? (
               <TryOnButton
                 overlaySrc={tryOnUrl}
@@ -333,11 +346,22 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 label="Примерить онлайн"
                 defaultOpen={autoOpenTryOn}
               />
-            ) : (
+            ) : !soldOut ? (
               <a className="btn btn-ghost" href="#lead-form">
                 Перезвоните мне
               </a>
-            )}
+            ) : whatsapp ? (
+              /* В sold-out режиме вторая кнопка — WhatsApp для прямого вопроса
+                 продавцу (а не лид-форма дублём) */
+              <a
+                className="btn btn-ghost"
+                href={`https://wa.me/${whatsapp}?text=${waText}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Написать в WhatsApp
+              </a>
+            ) : null}
           </div>
 
           <div
@@ -347,7 +371,9 @@ export default async function ProductPage({ params, searchParams }: Params) {
               borderTop: "1px solid var(--line)",
             }}
           >
-            <div className="eyebrow mb-3">Уточнить наличие</div>
+            <div className="eyebrow mb-3">
+              {soldOut ? "Уведомить о поступлении" : "Уточнить наличие"}
+            </div>
             <p
               className="mb-5"
               style={{
@@ -357,7 +383,9 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 maxWidth: 360,
               }}
             >
-              Менеджер перезвонит, расскажет про доставку и примерку.
+              {soldOut
+                ? "Модель разобрана. Оставьте номер — мы напишем, как только она снова появится в наличии."
+                : "Менеджер перезвонит, расскажет про доставку и примерку."}
             </p>
             <LeadForm productId={product.id} />
           </div>

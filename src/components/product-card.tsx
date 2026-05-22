@@ -38,6 +38,11 @@ export function ProductCard({ product }: { product: Product }) {
   // Защита от старых записей без slug — не строим битую ссылку.
   const href = product.slug ? `/catalog/${product.slug}` : "/catalog";
 
+  // Sold-out режим: модель показываем (модельный ряд не разваливается),
+  // но визуально приглушаем + плашка ПРОДАНО + цена с line-through.
+  // Premium-стиль (Toteme, Mykita, Cubitts).
+  const soldOut = product.inStock === false;
+
   return (
     <Link
       href={href}
@@ -46,7 +51,9 @@ export function ProductCard({ product }: { product: Product }) {
     >
       {/* Картинка-квадрат */}
       <div
-        className="relative aspect-square overflow-hidden card-hover flex items-center justify-center"
+        className={`relative aspect-square overflow-hidden card-hover flex items-center justify-center${
+          soldOut ? " card-soldout" : ""
+        }`}
         style={{ background: "var(--card)" }}
       >
         {/* Метка */}
@@ -111,19 +118,11 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         ) : null}
 
-        {/* Нет в наличии */}
-        {product.inStock === false ? (
-          <span
-            className="absolute bottom-3.5 right-3.5 px-2 py-1"
-            style={{
-              fontSize: 10,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--bg)",
-              background: "var(--ink)",
-            }}
-          >
-            Нет в наличии
+        {/* SOLD OUT — центральный premium-чип. Не диагональ, не «stamp» —
+            спокойная плашка в логотипном шрифте, как у Toteme/Mykita. */}
+        {soldOut ? (
+          <span className="chip-soldout" aria-label="Продано">
+            Sold out
           </span>
         ) : (
           /* Hover-CTA — выезжает снизу. Подсказка пользователю, что карточка кликабельна. */
@@ -179,10 +178,17 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="text-right shrink-0">
-          <div style={{ fontSize: 13, color: "var(--ink)", whiteSpace: "nowrap" }}>
+          <div
+            style={{
+              fontSize: 13,
+              color: soldOut ? "var(--muted)" : "var(--ink)",
+              whiteSpace: "nowrap",
+              textDecoration: soldOut ? "line-through" : undefined,
+            }}
+          >
             {formatPrice(product.price)}
           </div>
-          {product.oldPrice && product.oldPrice > product.price ? (
+          {product.oldPrice && product.oldPrice > product.price && !soldOut ? (
             <div
               style={{
                 fontSize: 11,
