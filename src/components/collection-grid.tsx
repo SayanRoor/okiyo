@@ -44,11 +44,14 @@ type Filter = "all" | "sun" | "optic";
 export function CollectionGrid({
   products,
   initialVisible = 8,
-  step = 4,
+  step = 8,
   initialFilter = "all",
   showFilters = true,
-  /** Сколько раз подгружать автоматически до показа кнопки. */
-  autoLoadBatches = 2,
+  /** Сколько авто-подгрузок до показа кнопки (для больших каталогов). */
+  autoLoadBatches = 4,
+  /** Каталог считается «небольшим», если в нём не больше этого числа моделей.
+   *  Для небольших — авто-скролл до конца без кнопки. */
+  smallCatalogThreshold = 40,
 }: {
   products: Product[];
   initialVisible?: number;
@@ -56,11 +59,12 @@ export function CollectionGrid({
   initialFilter?: Filter;
   showFilters?: boolean;
   autoLoadBatches?: number;
+  smallCatalogThreshold?: number;
 }) {
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const [visible, setVisible] = useState(initialVisible);
-  // Счётчик авто-загрузок — после `autoLoadBatches` отключаем observer
-  // и показываем явную кнопку.
+  // Счётчик авто-загрузок — для больших каталогов после `autoLoadBatches`
+  // отключаем observer и показываем явную кнопку, чтобы был доступ к футеру.
   const [autoLoads, setAutoLoads] = useState(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,7 +75,11 @@ export function CollectionGrid({
 
   const visibleSlice = filtered.slice(0, visible);
   const hasMore = visible < filtered.length;
-  const autoMode = hasMore && autoLoads < autoLoadBatches;
+  // Для небольших каталогов (<= 40 моделей) — авто-скролл до самого конца:
+  // кнопка не нужна, юзер просто доскроллит. Для больших — после N батчей
+  // включаем ручной режим (защищаем доступ к футеру + не грузим 200 DOM-узлов).
+  const isSmallCatalog = filtered.length <= smallCatalogThreshold;
+  const autoMode = hasMore && (isSmallCatalog || autoLoads < autoLoadBatches);
 
   function pick(next: Filter) {
     setFilter(next);
