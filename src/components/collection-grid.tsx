@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ProductCard } from "@/components/product-card";
 
@@ -21,21 +21,48 @@ type Product = {
 
 type Filter = "all" | "sun" | "optic";
 
+/**
+ * Гибрид infinite-scroll + Load More — best-practice для премиум e-commerce
+ * (Saint Laurent, Toteme, NET-A-PORTER, Mr Porter).
+ *
+ * Логика:
+ *   • Первые N товаров видны сразу.
+ *   • IntersectionObserver на сторож-элементе в конце сетки: когда юзер
+ *     доскроллил — подгружаем следующий батч АВТОМАТИЧЕСКИ.
+ *   • После `autoLoadBatches` авто-загрузок показываем явную кнопку
+ *     «Показать ещё». Это критично: без неё юзер не доберётся до футера
+ *     (доставка, гарантии, контакты — обязательные элементы доверия).
+ *   • Счётчик «X из Y моделей» — premium-паттерн: даёт чувство масштаба
+ *     коллекции и понимание «сколько ещё».
+ *
+ * Почему НЕ pure infinite scroll:
+ *   – футер становится недостижим (Baymard: 95% e-commerce-юзеров его ищут);
+ *   – back-button из карточки товара возвращает на верх каталога;
+ *   – глубокий список превращается в «вечную ленту» без понимания позиции;
+ *   – Google не индексирует JS-доскроленный контент.
+ */
 export function CollectionGrid({
   products,
   initialVisible = 8,
   step = 4,
   initialFilter = "all",
   showFilters = true,
+  /** Сколько раз подгружать автоматически до показа кнопки. */
+  autoLoadBatches = 2,
 }: {
   products: Product[];
   initialVisible?: number;
   step?: number;
   initialFilter?: Filter;
   showFilters?: boolean;
+  autoLoadBatches?: number;
 }) {
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const [visible, setVisible] = useState(initialVisible);
+  // Счётчик авто-загрузок — после `autoLoadBatches` отключаем observer
+  // и показываем явную кнопку.
+  const [autoLoads, setAutoLoads] = useState(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const filtered = useMemo(() => {
     if (filter === "all") return products;
@@ -44,11 +71,40 @@ export function CollectionGrid({
 
   const visibleSlice = filtered.slice(0, visible);
   const hasMore = visible < filtered.length;
+  const autoMode = hasMore && autoLoads < autoLoadBatches;
 
   function pick(next: Filter) {
     setFilter(next);
     setVisible(initialVisible);
+    setAutoLoads(0);
   }
+
+  // IntersectionObserver — следит за сентинелем под сеткой. Когда он
+  // показывается во вьюпорте — подгружаем следующий батч.
+  useEffect(() => {
+    if (!autoMode) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry?.isIntersecting) {
+          setVisible((v) => Math.min(v + step, filtered.length));
+          setAutoLoads((n) => n + 1);
+        }
+      },
+      {
+        // Чуть с запасом — товары начинают грузиться до того, как юзер
+        // долистал ровно до конца. Ощущение «бесконечности».
+        rootMargin: "300px 0px",
+        threshold: 0.01,
+      },
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, [autoMode, step, filtered.length, visible]);
 
   return (
     <>
@@ -105,31 +161,56 @@ export function CollectionGrid({
         </div>
       )}
 
-      {hasMore ? (
-        <div className="flex justify-center pt-16 pb-6">
+      {/* Сентинель — невидимый «маяк» под сеткой. IntersectionObserver
+          ловит его пересечение со вьюпортом и триггерит подгрузку. */}
+      {autoMode ? (
+        <div
+          ref={sentinelRef}
+          aria-hidden
+          style={{ height: 1, width: "100%", marginTop: 32 }}
+        />
+      ) : null}
+
+      {/* Авто-режим: спиннер пока новый батч "грузится" (на самом деле — мгновенно,
+          но визуальный сигнал улучшает воспринимаемую плавность). */}
+      {autoMode ? (
+        <div className="flex justify-center pt-10 pb-2">
+          <span className="okiyo-grid-spinner" aria-hidden />
+        </div>
+      ) : null}
+
+      {/* Ручной режим: после N авто-подгрузок — явная кнопка «Показать ещё». */}
+      {hasMore && !autoMode ? (
+        <div className="flex justify-center pt-16 pb-2">
           <button
             type="button"
-            onClick={() => setVisible((v) => v + step)}
-            className="px-8 py-3.5 border bg-transparent cursor-pointer transition-colors"
-            style={{
-              borderColor: "var(--line)",
-              fontSize: 11,
-              textTransform: "uppercase",
-              letterSpacing: "0.22em",
-              color: "var(--muted)",
-              fontFamily: "inherit",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--ink)";
-              e.currentTarget.style.color = "var(--ink)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--line)";
-              e.currentTarget.style.color = "var(--muted)";
-            }}
+            onClick={() => setVisible((v) => Math.min(v + step, filtered.length))}
+            className="okiyo-loadmore"
           >
             Показать ещё
+            <span style={{ marginLeft: 8, opacity: 0.55 }}>
+              +{Math.min(step, filtered.length - visible)}
+            </span>
           </button>
+        </div>
+      ) : null}
+
+      {/* Счётчик «X из Y моделей» — даёт чувство масштаба коллекции,
+          подтверждает что «всё» показано когда hasMore=false. */}
+      {filtered.length > 0 ? (
+        <div
+          className="flex justify-center pt-6 pb-2"
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "var(--muted)",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {hasMore
+            ? `${visibleSlice.length} из ${filtered.length} моделей`
+            : `Все ${filtered.length} моделей показаны`}
         </div>
       ) : null}
     </>

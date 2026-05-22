@@ -430,6 +430,45 @@ img {
   border-bottom: 1px solid var(--ink);
 }
 
+/* --------------------------------------------------------- */
+/* Каталог: кнопка «Показать ещё» + спиннер для auto-load    */
+/* --------------------------------------------------------- */
+.okiyo-loadmore {
+  padding: 13px 30px;
+  background: transparent;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.okiyo-loadmore:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.okiyo-grid-spinner {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--line);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: okiyo-spin 0.7s linear infinite;
+  opacity: 0.65;
+}
+
+@keyframes okiyo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* OKIYO grid — 2 колонки на мобиле, 4 на широком экране */
 .okiyo-grid {
   display: grid;
