@@ -29,12 +29,17 @@ export function Header({
   // Эталонный визуальный логотип — буквы с большим letter-spacing.
   const brandSpaced = brandName.split("").join(" ");
 
+  // Дефолтная «бегущая строка» преимуществ для top-bar.
+  // Premium-tier формулировки: короткие, ритмичные, без «продаж» —
+  // только факты + место (как у Loewe / Toteme / Mykita).
+  // Перетянуть строки можно в админке Settings → topbar.
   const topbar =
     settings.topbar && settings.topbar.length > 0
       ? settings.topbar
       : [
-          { text: "Бесплатная доставка по Алматы" },
-          { text: "Привезём за 2 часа" },
+          { text: "Алматы — бесплатно, за 2 часа" },
+          { text: "По Казахстану — транспортной компанией" },
+          { text: "Бессрочная гарантия каркаса" },
         ];
 
   const waNumber = sanitizePhone(settings.whatsapp);

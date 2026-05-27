@@ -30,7 +30,7 @@ export const Settings: GlobalConfig = {
               maxRows: 4,
               admin: {
                 description:
-                  "До 4 фраз, разделяются точкой. Например: Бесплатная доставка по Алматы · Привезём за 2 часа",
+                  "До 4 коротких фраз — на сайте они станут заглавными и разделятся точкой. Оптимально 2–3 строки. Пример: Алматы — бесплатно, за 2 часа · По Казахстану — транспортной компанией · Бессрочная гарантия каркаса. Если оставить пусто — подставятся дефолтные.",
               },
               fields: [{ name: "text", type: "text", required: true }],
             },
@@ -44,6 +44,16 @@ export const Settings: GlobalConfig = {
             { name: "email", type: "email" },
             { name: "address", type: "textarea", label: "Адрес салона" },
             { name: "workingHours", type: "text", label: "Часы работы" },
+            {
+              name: "kaspiShopUrl",
+              type: "text",
+              label: "Ссылка на магазин в Kaspi",
+              admin: {
+                description:
+                  "Полный URL вида https://kaspi.kz/shop/p/okiyo-...  — на странице товара появится тонкая ссылка-альтернатива «Также в Kaspi · Рассрочка 0–0–12». Если пусто — блок не показывается.",
+                placeholder: "https://kaspi.kz/shop/p/okiyo-...",
+              },
+            },
           ],
         },
         {

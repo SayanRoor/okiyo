@@ -79,6 +79,16 @@ export default async function ProductPage({ params, searchParams }: Params) {
 
   const settings = await p.findGlobal({ slug: "settings" });
   const whatsapp = sanitizePhone(settings.whatsapp);
+  // Ссылка на Kaspi Магазин. Поле опциональное — блок «Также в Kaspi»
+  // на странице товара показывается только при наличии валидного URL.
+  // Базовая валидация — должно начинаться с http(s) и содержать kaspi.kz,
+  // чтобы не вывести случайно битую ссылку и не сломать доверие.
+  const kaspiRaw = (settings as { kaspiShopUrl?: string | null }).kaspiShopUrl;
+  const kaspiUrl =
+    typeof kaspiRaw === "string" &&
+    /^https?:\/\/.*kaspi\.kz/i.test(kaspiRaw.trim())
+      ? kaspiRaw.trim()
+      : null;
   // URL прозрачного PNG для виртуальной примерки (если менеджер загрузил)
   const tryOnUrl =
     product.tryOnImage && typeof product.tryOnImage === "object"
@@ -472,6 +482,55 @@ export default async function ProductPage({ params, searchParams }: Params) {
               </a>
             ) : null}
           </div>
+
+          {/* Kaspi-канал — тонкая текстовая альтернатива основному CTA.
+              Не кнопка: главный путь — собственный checkout/WhatsApp
+              (выше маржа, прямой контакт с клиентом). Kaspi даёт второй путь
+              для тех, кому нужна рассрочка 0–0–12 и доставка по Казахстану
+              через пункты выдачи. Не показываем при sold-out (нечего отправлять).
+              Wordmark «Kaspi» — italic в Tenor/Cormorant, БЕЗ красного бренда,
+              чтобы не ломать минималистичную айдентику OKIYO. */}
+          {kaspiUrl && !soldOut ? (
+            <div
+              style={{
+                marginTop: 22,
+                paddingTop: 16,
+                borderTop: "1px solid var(--line)",
+              }}
+            >
+              <a
+                href={kaspiUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="okiyo-kaspi-link"
+                title="Перейти в Kaspi Магазин — рассрочка 0–0–12 и доставка через пункты выдачи по Казахстану"
+              >
+                <span>
+                  Также в{" "}
+                  <em
+                    style={{
+                      fontFamily: "var(--font-serif), serif",
+                      fontStyle: "italic",
+                      fontSize: 14,
+                      color: "var(--ink)",
+                      fontWeight: 400,
+                      letterSpacing: 0,
+                    }}
+                  >
+                    Kaspi
+                  </em>{" "}
+                  Магазине
+                </span>
+                <span aria-hidden style={{ opacity: 0.45, margin: "0 2px" }}>
+                  ·
+                </span>
+                <span>Рассрочка 0–0–12</span>
+                <span aria-hidden style={{ marginLeft: 4 }}>
+                  →
+                </span>
+              </a>
+            </div>
+          ) : null}
 
           <div
             id="lead-form"

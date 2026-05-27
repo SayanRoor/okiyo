@@ -431,6 +431,37 @@ img {
 }
 
 /* --------------------------------------------------------- */
+/* Kaspi-альтернатива под CTA товара                          */
+/* Текстовая ссылка, без логотипа Kaspi — премиум-минимализм. */
+/* «Kaspi» внутри ссылки — italic-акцент в серифе, как echo   */
+/* hero-заголовка «ярче взгляд». →-стрелка едет на hover.     */
+/* --------------------------------------------------------- */
+.okiyo-kaspi-link {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.okiyo-kaspi-link:hover {
+  color: var(--ink);
+}
+
+.okiyo-kaspi-link span:last-child {
+  display: inline-block;
+  transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.okiyo-kaspi-link:hover span:last-child {
+  transform: translateX(3px);
+}
+
+/* --------------------------------------------------------- */
 /* Каталог: кнопка «Показать ещё» + спиннер для auto-load    */
 /* --------------------------------------------------------- */
 .okiyo-loadmore {
