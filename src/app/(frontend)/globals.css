@@ -431,6 +431,183 @@ img {
 }
 
 /* --------------------------------------------------------- */
+/* Правовые страницы — Политика, Оферта, Возврат              */
+/* --------------------------------------------------------- */
+.okiyo-legal {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.okiyo-legal__title {
+  font-family: var(--font-serif), serif;
+  font-weight: 300;
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.okiyo-legal__updated {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.okiyo-legal__body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.okiyo-legal__body h2 {
+  font-family: var(--font-serif), serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: -0.005em;
+  margin-top: 48px;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+
+.okiyo-legal__body h2:first-child {
+  margin-top: 0;
+}
+
+.okiyo-legal__body p {
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+
+.okiyo-legal__body ul,
+.okiyo-legal__body ol {
+  margin-bottom: 16px;
+  padding-left: 20px;
+}
+
+.okiyo-legal__body li {
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.okiyo-legal__body a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 0.6px;
+}
+
+.okiyo-legal__body a:hover {
+  opacity: 0.6;
+}
+
+.okiyo-legal__body .legal-meta {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* --------------------------------------------------------- */
+/* Cookie-консент — минималистичная плашка снизу              */
+/* --------------------------------------------------------- */
+.okiyo-consent {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 100;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+  animation: okiyo-consent-in 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes okiyo-consent-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.okiyo-consent__inner {
+  padding: 18px 22px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.okiyo-consent__text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+  flex: 1 1 280px;
+}
+
+.okiyo-consent__link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 0.6px;
+}
+
+.okiyo-consent__link:hover {
+  opacity: 0.7;
+}
+
+.okiyo-consent__actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.okiyo-consent__btn {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  transition: all 180ms ease;
+}
+
+.okiyo-consent__btn--ghost:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.okiyo-consent__btn--primary {
+  background: var(--ink);
+  color: var(--card);
+  border-color: var(--ink);
+}
+
+.okiyo-consent__btn--primary:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .okiyo-consent { left: 8px; right: 8px; bottom: 8px; }
+  .okiyo-consent__inner { padding: 14px 16px; gap: 12px; }
+  .okiyo-consent__actions { width: 100%; }
+  .okiyo-consent__btn { flex: 1; padding: 11px 12px; }
+}
+
+/* --------------------------------------------------------- */
 /* Kaspi-альтернатива под CTA товара                          */
 /* Текстовая ссылка, без логотипа Kaspi — премиум-минимализм. */
 /* «Kaspi» внутри ссылки — italic-акцент в серифе, как echo   */

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LeadForm } from "@/components/lead-form";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
+import { TrackedLink } from "@/components/tracked-link";
 import { TryOnButton } from "@/components/try-on-button";
 import { formatPrice, sanitizePhone } from "@/lib/format";
 import { payload } from "@/lib/payload";
@@ -447,15 +448,21 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 </span>
               </a>
             ) : whatsapp ? (
-              <a
+              <TrackedLink
+                event="whatsapp_click"
+                params={{
+                  source: "product_primary",
+                  product_id: product.id,
+                  value: product.price ?? null,
+                }}
                 className="btn btn-primary"
                 href={`https://wa.me/${whatsapp}?text=${waText}`}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`Заказать ${product.title} в WhatsApp`}
+                ariaLabel={`Заказать ${product.title} в WhatsApp`}
               >
                 Заказать в WhatsApp
-              </a>
+              </TrackedLink>
             ) : null}
 
             {tryOnEnabled && tryOnFrames.length > 0 ? (
@@ -472,14 +479,19 @@ export default async function ProductPage({ params, searchParams }: Params) {
             ) : whatsapp ? (
               /* В sold-out режиме вторая кнопка — WhatsApp для прямого вопроса
                  продавцу (а не лид-форма дублём) */
-              <a
+              <TrackedLink
+                event="whatsapp_click"
+                params={{
+                  source: "product_secondary_soldout",
+                  product_id: product.id,
+                }}
                 className="btn btn-ghost"
                 href={`https://wa.me/${whatsapp}?text=${waText}`}
                 target="_blank"
                 rel="noreferrer"
               >
                 Написать в WhatsApp
-              </a>
+              </TrackedLink>
             ) : null}
           </div>
 
@@ -498,7 +510,12 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 borderTop: "1px solid var(--line)",
               }}
             >
-              <a
+              <TrackedLink
+                event="kaspi_click"
+                params={{
+                  product_id: product.id,
+                  value: product.price ?? null,
+                }}
                 href={kaspiUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -528,7 +545,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
                 <span aria-hidden style={{ marginLeft: 4 }}>
                   →
                 </span>
-              </a>
+              </TrackedLink>
             </div>
           ) : null}
 

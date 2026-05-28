@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
+import { trackEvent } from "@/lib/analytics";
+
 import type { VtoFrame } from "./virtual-try-on";
 
 // MediaPipe весит ~12 MB — lazy-импорт только при клике, без SSR.
@@ -40,7 +42,17 @@ export function TryOnButton({
 
   return (
     <>
-      <button type="button" className={className} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={className}
+        onClick={() => {
+          setOpen(true);
+          trackEvent("try_on_open", {
+            product_id: initialId ?? null,
+            frames_count: frames.length,
+          });
+        }}
+      >
         {label}
       </button>
       {open ? (

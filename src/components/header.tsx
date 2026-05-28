@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TrackedLink } from "@/components/tracked-link";
 import { sanitizePhone } from "@/lib/format";
 
 type Settings = {
@@ -140,12 +141,14 @@ export function Header({
         <div className="flex gap-3 sm:gap-4 justify-end items-center text-[13px]">
           <ThemeToggle />
           {waNumber ? (
-            <a
+            <TrackedLink
+              event="whatsapp_click"
+              params={{ source: "header" }}
               href={`https://wa.me/${waNumber}`}
               target="_blank"
               rel="noreferrer"
               className="hidden sm:inline-flex items-center gap-2 hover:opacity-60 transition-opacity"
-              aria-label="Написать в WhatsApp"
+              ariaLabel="Написать в WhatsApp"
             >
               <svg
                 width="14"
@@ -159,7 +162,7 @@ export function Header({
                 <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.2-5.2A8.5 8.5 0 1 1 21 11.5z" />
               </svg>
               <span>WhatsApp</span>
-            </a>
+            </TrackedLink>
           ) : null}
         </div>
       </nav>

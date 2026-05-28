@@ -1,3 +1,6 @@
+"use client";
+
+import { trackEvent } from "@/lib/analytics";
 import { sanitizePhone } from "@/lib/format";
 
 /**
@@ -27,6 +30,7 @@ export function WhatsAppFab({
       rel="noreferrer"
       aria-label="Написать в WhatsApp"
       className="whatsapp-fab"
+      onClick={() => trackEvent("whatsapp_click", { source: "fab" })}
     >
       <svg
         width="26"

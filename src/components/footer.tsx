@@ -70,9 +70,9 @@ export function Footer({ settings }: { settings: Settings }) {
           </FooterCol>
 
           <FooterCol title="Помощь">
-            <FootLink href="/contacts">Доставка</FootLink>
-            <FootLink href="/contacts">Обмен и возврат</FootLink>
-            <FootLink href="/contacts">Уход за оправой</FootLink>
+            <FootLink href="/oferta">Доставка и оплата</FootLink>
+            <FootLink href="/return">Обмен и возврат</FootLink>
+            <FootLink href="/policy">Конфиденциальность</FootLink>
           </FooterCol>
 
           <FooterCol title="Связь">

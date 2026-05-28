@@ -138,6 +138,46 @@ export const Settings: GlobalConfig = {
             { name: "ogImage", type: "upload", relationTo: "media" },
           ],
         },
+        {
+          label: "Юридическое",
+          description:
+            "Реквизиты для страниц политики, оферты и возврата. Эти поля попадают в footer этих страниц — без них Google Ads может отклонить кампанию на модерации.",
+          fields: [
+            {
+              name: "legalCompanyName",
+              type: "text",
+              label: "Юр. наименование",
+              admin: {
+                description:
+                  "Например: ИП Иванова И.И. — указывается на правовых страницах.",
+              },
+            },
+            {
+              name: "legalBin",
+              type: "text",
+              label: "БИН / ИИН",
+              admin: { description: "12-значный номер." },
+            },
+            {
+              name: "legalAddress",
+              type: "textarea",
+              label: "Юридический адрес",
+              admin: {
+                description:
+                  "Полный адрес регистрации, отдельно от адреса салона.",
+              },
+            },
+            {
+              name: "legalEmail",
+              type: "email",
+              label: "Email для правовых обращений",
+              admin: {
+                description:
+                  "Куда писать запросы по персональным данным. Если пусто — используется обычный email.",
+              },
+            },
+          ],
+        },
       ],
     },
   ],

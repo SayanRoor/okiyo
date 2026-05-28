@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { trackEvent } from "@/lib/analytics";
 import { submitLead } from "@/lib/leads";
 
 function SubmitButton() {
@@ -47,6 +48,14 @@ export function LeadForm({
           productId: productId ?? null,
           honeypot: String(formData.get("company") ?? ""),
         });
+        // Конверсионное событие — только при успешной отправке.
+        // В GTM это привязывается к Google Ads conversion (primary).
+        if (result.ok) {
+          trackEvent("lead_form_submit", {
+            product_id: productId ?? null,
+            form_variant: variant,
+          });
+        }
         setDone(result.ok ? "ok" : result.error);
       }}
       className={

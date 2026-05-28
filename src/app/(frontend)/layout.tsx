@@ -2,12 +2,17 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, Tenor_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 
+import { CookieConsent } from "@/components/cookie-consent";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { WhatsAppFab } from "@/components/whatsapp-fab";
 import { payload } from "@/lib/payload";
 
 import "./globals.css";
+
+// GTM container — задаётся через .env.local (NEXT_PUBLIC_GTM_ID).
+// Если не задан — скрипт не подключается и сайт работает как раньше.
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 const sans = Inter({
   variable: "--font-sans",
@@ -81,12 +86,43 @@ export default async function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('okiyo-theme');if(!t){var c=document.cookie.split('; ').find(function(s){return s.indexOf('okiyo-theme=')===0});if(c)t=c.split('=')[1]}if(t==='night'||t==='day'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}})();`,
           }}
         />
+        {/* Google Consent Mode v2 + GTM. Consent-defaults ОБЯЗАТЕЛЬНО должны быть
+            до загрузки GTM, иначе теги отработают без учёта согласия.
+            Считываем сохранённый выбор из localStorage и сразу обновляем consent,
+            чтобы не было «вспышки» permission-state у возвращающихся юзеров. */}
+        {GTM_ID ? (
+          <>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',functionality_storage:'granted',security_storage:'granted',wait_for_update:500});try{var c=localStorage.getItem('okiyo-consent');if(c==='granted'){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'})}}catch(e){}`,
+              }}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`,
+              }}
+            />
+          </>
+        ) : null}
       </head>
       <body className="min-h-full flex flex-col">
+        {/* GTM noscript fallback — для пользователей с отключённым JS. */}
+        {GTM_ID ? (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager"
+            />
+          </noscript>
+        ) : null}
         <Header settings={settings} categories={categories.docs} />
         <main className="flex-1">{children}</main>
         <Footer settings={settings} />
         <WhatsAppFab whatsapp={settings.whatsapp} />
+        {GTM_ID ? <CookieConsent /> : null}
       </body>
     </html>
   );
