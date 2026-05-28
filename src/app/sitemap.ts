@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 
 import { payload } from "@/lib/payload";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Динамический sitemap.xml. Next.js автоматически отдаёт его по адресу
  * /sitemap.xml — туда же ссылается robots.txt.
