@@ -19,6 +19,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Build needs *something* in DATABASE_URI for type generation; runtime overrides it.
 ENV DATABASE_URI=postgres://placeholder:placeholder@localhost:5432/placeholder
 ENV PAYLOAD_SECRET=build-time-placeholder
+# NEXT_PUBLIC_* vars are baked into the JS bundle at build time.
+ARG NEXT_PUBLIC_GTM_ID
+ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
 RUN pnpm build
 
 FROM base AS runner
