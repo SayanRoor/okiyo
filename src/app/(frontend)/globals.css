@@ -515,6 +515,327 @@ img {
 }
 
 /* --------------------------------------------------------- */
+/* Reviews — отзывы клиентов                                  */
+/* --------------------------------------------------------- */
+.okiyo-reviews {
+  margin: 0 auto;
+  padding: 64px 0;
+}
+
+.okiyo-reviews__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.okiyo-reviews__title {
+  font-family: var(--font-serif), serif;
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.okiyo-reviews__summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.okiyo-reviews__summary-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.okiyo-reviews__avg {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.okiyo-reviews__count {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.okiyo-reviews__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0;
+}
+
+.okiyo-reviews__list {
+  display: grid;
+  gap: 0;
+}
+
+.okiyo-review-card {
+  padding: 28px 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+}
+
+.okiyo-reviews__grid .okiyo-review-card {
+  border-right: 1px solid var(--line);
+}
+
+.okiyo-reviews__grid .okiyo-review-card:nth-last-child(-n+1) {
+  border-bottom: 1px solid var(--line);
+}
+
+/* Убираем правую границу у последних в каждом ряду — но это сложно
+   без JS. Простое решение: разрешить overflow, контейнер обрежет. */
+.okiyo-review-card__text {
+  flex: 1;
+  margin: 18px 0 24px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.okiyo-review-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.okiyo-review-card__avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--line);
+  flex-shrink: 0;
+}
+
+.okiyo-review-card__avatar--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-logo), sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+.okiyo-review-card__person {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.okiyo-review-card__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.okiyo-review-card__verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--card);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.okiyo-review-card__city {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.okiyo-stars {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--ink);
+  opacity: 0.35;
+}
+
+.okiyo-stars__star {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke-width: 1.2;
+}
+
+.okiyo-stars__star.is-full {
+  fill: currentColor;
+}
+
+.okiyo-stars[data-size="large"] .okiyo-stars__star {
+  width: 18px;
+  height: 18px;
+}
+
+/* "Заполненные" звёзды у большой версии — полная непрозрачность */
+.okiyo-stars__star.is-full {
+  opacity: 1;
+}
+
+/* Чтобы у строки звёзд была сразу видна полная видимость когда хотя бы
+   одна звезда заполнена. Иначе блёклые "пустышки" в одном цвете. */
+.okiyo-stars:has(.is-full) { opacity: 1; }
+.okiyo-stars:has(.is-full) .okiyo-stars__star:not(.is-full) {
+  opacity: 0.25;
+  fill: none;
+}
+
+@media (max-width: 640px) {
+  .okiyo-reviews { padding: 48px 0; }
+  .okiyo-reviews__grid { grid-template-columns: 1fr; }
+  .okiyo-reviews__grid .okiyo-review-card { border-right: none; }
+  .okiyo-review-card { padding: 24px 0; min-height: auto; }
+}
+
+/* --------------------------------------------------------- */
+/* Телефон в шапке — click-to-call                            */
+/* На мобайле: только иконка (экономим место).                */
+/* На десктопе: иконка + номер для копирования + Call Extensions. */
+/* --------------------------------------------------------- */
+.okiyo-header-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.okiyo-header-phone__number {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .okiyo-header-phone { gap: 8px; }
+  .okiyo-header-phone__number { display: inline; }
+}
+
+/* --------------------------------------------------------- */
+/* Sticky mobile CTA на странице товара                       */
+/* Виден только на мобайле (md:hidden эквивалент в CSS).      */
+/* Плавно въезжает после ~120px скролла, держит CTA в видимой */
+/* зоне даже при просмотре галереи и описания.                */
+/* --------------------------------------------------------- */
+.okiyo-sticky-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px;
+  transform: translateY(120%);
+  transition: transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  display: none;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.okiyo-sticky-bar[data-visible="true"] {
+  transform: translateY(0);
+}
+
+@media (max-width: 767px) {
+  .okiyo-sticky-bar { display: block; }
+  /* Добавляем нижний отступ к main, чтобы sticky-bar не перекрывал
+     последний контент (типа лид-формы). Высота panel ~68px + safe-area. */
+  main { padding-bottom: 84px; }
+}
+
+.okiyo-sticky-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.okiyo-sticky-bar__price {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.okiyo-sticky-bar__label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.okiyo-sticky-bar__value {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.okiyo-sticky-bar__btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 18px;
+  background: var(--ink);
+  color: var(--card);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  border-radius: 4px;
+  text-align: center;
+  transition: opacity 200ms ease;
+  white-space: nowrap;
+}
+
+.okiyo-sticky-bar__btn:hover { opacity: 0.85; }
+.okiyo-sticky-bar__btn:active { opacity: 0.7; }
+
+.okiyo-sticky-bar__arrow {
+  display: inline-block;
+  transition: transform 180ms ease;
+}
+
+.okiyo-sticky-bar__btn:hover .okiyo-sticky-bar__arrow {
+  transform: translateX(3px);
+}
+
+/* --------------------------------------------------------- */
 /* Cookie-консент — минималистичная плашка снизу              */
 /* --------------------------------------------------------- */
 .okiyo-consent {

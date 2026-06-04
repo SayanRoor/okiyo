@@ -44,6 +44,11 @@ export function Header({
         ];
 
   const waNumber = sanitizePhone(settings.whatsapp);
+  // Телефон для click-to-call. На мобайле = звонок одним кликом,
+  // на десктопе показываем номер для копирования + активирует Call Extensions
+  // в Google Ads (Google подтягивает номер прямо из шапки сайта).
+  const phoneRaw = settings.phone?.trim() || null;
+  const phoneDial = phoneRaw ? phoneRaw.replace(/[^+\d]/g, "") : null;
 
   return (
     <header className="okiyo-header">
@@ -140,6 +145,29 @@ export function Header({
         {/* Правая часть */}
         <div className="flex gap-3 sm:gap-4 justify-end items-center text-[13px]">
           <ThemeToggle />
+          {phoneDial ? (
+            <TrackedLink
+              event="phone_click"
+              params={{ source: "header" }}
+              href={`tel:${phoneDial}`}
+              className="okiyo-header-phone hover:opacity-60 transition-opacity"
+              ariaLabel={`Позвонить ${phoneRaw}`}
+              title="Позвонить — на мобильном кликнется звонок"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden
+              >
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              <span className="okiyo-header-phone__number">{phoneRaw}</span>
+            </TrackedLink>
+          ) : null}
           {waNumber ? (
             <TrackedLink
               event="whatsapp_click"

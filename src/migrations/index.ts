@@ -9,6 +9,7 @@ import * as migration_20260520_000000_products_try_on_image from './20260520_000
 import * as migration_20260522_000000_products_enable_try_on from './20260522_000000_products_enable_try_on';
 import * as migration_20260527_000000_settings_kaspi_url from './20260527_000000_settings_kaspi_url';
 import * as migration_20260527_120000_settings_legal_fields from './20260527_120000_settings_legal_fields';
+import * as migration_20260604_000000_reviews_collection from './20260604_000000_reviews_collection';
 
 export const migrations = [
   {
@@ -65,5 +66,10 @@ export const migrations = [
     up: migration_20260527_120000_settings_legal_fields.up,
     down: migration_20260527_120000_settings_legal_fields.down,
     name: '20260527_120000_settings_legal_fields',
+  },
+  {
+    up: migration_20260604_000000_reviews_collection.up,
+    down: migration_20260604_000000_reviews_collection.down,
+    name: '20260604_000000_reviews_collection',
   },
 ];
