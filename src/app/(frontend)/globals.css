@@ -715,6 +715,38 @@ img {
 }
 
 /* --------------------------------------------------------- */
+/* Логотип в шапке — респонсивный                              */
+/* На мобиле меньше fontSize и letter-spacing, чтобы не         */
+/* перекрывал «КАТАЛОГ» слева в узком grid.                    */
+/* --------------------------------------------------------- */
+.okiyo-header-logo {
+  font-family: var(--font-logo), 'Optima', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  color: var(--ink);
+  padding-left: 0.28em;
+  white-space: nowrap;
+}
+
+@media (min-width: 480px) {
+  .okiyo-header-logo {
+    font-size: 19px;
+    letter-spacing: 0.36em;
+    padding-left: 0.36em;
+  }
+}
+
+@media (min-width: 768px) {
+  .okiyo-header-logo {
+    font-size: 22px;
+    letter-spacing: 0.46em;
+    padding-left: 0.46em;
+  }
+}
+
+/* --------------------------------------------------------- */
 /* Телефон в шапке — click-to-call                            */
 /* На мобайле: только иконка (экономим место).                */
 /* На десктопе: иконка + номер для копирования + Call Extensions. */

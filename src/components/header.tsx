@@ -120,26 +120,15 @@ export function Header({
 
         {/* Лого по центру — всегда текстовый брендмарк в Tenor Sans.
             Старая картинка-логотип из Settings.logo не используется в шапке,
-            чтобы не конкурировать с тиснёной надписью. */}
+            чтобы не конкурировать с тиснёной надписью.
+            На мобиле уменьшаем fontSize и letter-spacing, чтобы лого
+            не перекрывало «КАТАЛОГ» слева. */}
         <Link
           href="/"
           className="flex items-center justify-center min-w-0"
           aria-label={brandName}
         >
-          <div
-            style={{
-              fontFamily: "var(--font-logo), 'Optima', sans-serif",
-              fontWeight: 400,
-              fontSize: 22,
-              letterSpacing: "0.46em",
-              lineHeight: 1,
-              color: "var(--ink)",
-              paddingLeft: "0.46em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {brandSpaced}
-          </div>
+          <div className="okiyo-header-logo">{brandSpaced}</div>
         </Link>
 
         {/* Правая часть */}
