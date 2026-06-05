@@ -108,9 +108,9 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
       {/* HERO */}
-      <section className="container-x okiyo-hero py-12 md:py-20">
+      <section className="container-x okiyo-hero py-8 md:py-20">
         <div className="min-w-0">
-          <div className="eyebrow mb-6">{heroEyebrow}</div>
+          <div className="eyebrow mb-5 md:mb-6">{heroEyebrow}</div>
           <h1
             style={{
               fontFamily: "var(--font-serif), serif",
@@ -119,16 +119,17 @@ export default async function HomePage() {
               lineHeight: 1.02,
               // -0.02em рубил буквы; -0.015 безопаснее для разных слов
               letterSpacing: "-0.015em",
-              // 108px max был «крик». 84px — спокойный premium-tier
+              // 36px минимум на мобайле даёт больше воздуха под фото.
+              // 84px max — спокойный premium-tier
               // (Saint Laurent ~72px, Loewe ~88px, Toteme ~56px)
-              fontSize: "clamp(44px, 6.2vw, 84px)",
+              fontSize: "clamp(36px, 6.2vw, 84px)",
               color: "var(--ink)",
             }}
           >
             {renderTitle}
           </h1>
           <p
-            className="mt-7"
+            className="mt-5 md:mt-7"
             style={{
               maxWidth: 420,
               color: "var(--muted)",
@@ -138,7 +139,7 @@ export default async function HomePage() {
           >
             {heroSubtitle}
           </p>
-          <div className="mt-9 flex gap-3 flex-wrap">
+          <div className="mt-7 md:mt-9 flex gap-3 flex-wrap">
             <Link href={heroCtaHref} className="btn btn-primary">
               <span>{heroCtaLabel}</span>
               <span className="arrow" aria-hidden>
