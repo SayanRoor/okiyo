@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AvailabilityBadge } from "@/components/availability-badge";
 import { LeadForm } from "@/components/lead-form";
 import { MobileStickyBar } from "@/components/mobile-sticky-bar";
 import { ProductCard } from "@/components/product-card";
+import { ProductFaq } from "@/components/product-faq";
 import { ProductGallery } from "@/components/product-gallery";
 import { ReviewsBlock, type Review } from "@/components/reviews-block";
 import { TrackedLink } from "@/components/tracked-link";
+import { TrustStrip } from "@/components/trust-strip";
 import { TryOnButton } from "@/components/try-on-button";
 import { formatPrice, sanitizePhone } from "@/lib/format";
 import { payload } from "@/lib/payload";
@@ -445,6 +448,14 @@ export default async function ProductPage({ params, searchParams }: Params) {
             ) : null}
           </div>
 
+          {/* Live availability badge — динамический срок доставки.
+              Не показываем в sold-out: там есть свой блок «уведомить». */}
+          {!soldOut ? <AvailabilityBadge /> : null}
+
+          {/* Trust strip — 4 быстрых аргумента под ценой, закрывают главные
+              возражения (качество / скорость / возврат / оплата). */}
+          <TrustStrip />
+
           {/* Цветовые swatch'и теперь живут в <ProductGallery>, чтобы клик по ним менял главное фото. */}
 
           {product.shortDescription ? (
@@ -637,6 +648,11 @@ export default async function ProductPage({ params, searchParams }: Params) {
               </TrackedLink>
             </div>
           ) : null}
+
+          {/* FAQ — закрывает 5 главных возражений inline.
+              Без него покупатель уходит гуглить «есть ли возврат у OKIYO» и
+              теряется. С ним — все ответы в одном месте, остаётся на странице. */}
+          <ProductFaq whatsapp={whatsapp} />
 
           <div
             id="lead-form"
