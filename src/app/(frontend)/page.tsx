@@ -63,12 +63,19 @@ export default async function HomePage() {
     slides.push({ url: u, alt: mediaAlt(h.image) || "OKIYO" });
   }
 
-  const heroEyebrow = settings.heroEyebrow || "Spring Collection — 2026";
-  const heroTitle = settings.heroTitle || "Тише линий — ярче взгляд.";
+  // Дефолты hero оптимизированы под холодный рекламный трафик:
+  // — eyebrow несёт цену («ОТ 12 000 ₸») рядом с категорией коллекции,
+  //   чтобы покупатель видел стоимость сразу, не дожидаясь карточки товара;
+  // — title в 3 слова — помещается одной строкой даже на узком десктопе;
+  // — subtitle перечисляет качество → доставку → способ — три страха закрыты;
+  // — CTA глагольно-активный.
+  const heroEyebrow =
+    settings.heroEyebrow || "Spring Collection 2026 · от 12 000 ₸";
+  const heroTitle = settings.heroTitle || "Очки японского дизайна";
   const heroSubtitle =
     settings.heroSubtitle ||
-    "OKIYO — японские очки с минималистичным силуэтом. Лёгкий ацетат, поляризация UV400, бессрочная гарантия каркаса.";
-  const heroCtaLabel = settings.heroCtaLabel || "Смотреть коллекцию";
+    "Поляризация UV400, прочные оправы из поликарбоната и металла. Доставка по Алматы за 2 часа, по Казахстану — Kaspi PickUp или Казпочтой.";
+  const heroCtaLabel = settings.heroCtaLabel || "Выбрать пару";
   const heroCtaHref = settings.heroCtaHref || "/catalog";
 
   // Заголовок может содержать «—» как разделитель, выделяем хвост курсивом.
@@ -103,9 +110,11 @@ export default async function HomePage() {
               // -0.02em рубил буквы; -0.015 безопаснее для разных слов
               letterSpacing: "-0.015em",
               // 36px минимум на мобайле даёт больше воздуха под фото.
-              // 84px max — спокойный premium-tier
-              // (Saint Laurent ~72px, Loewe ~88px, Toteme ~56px)
-              fontSize: "clamp(36px, 6.2vw, 84px)",
+              // 72px max — снижение с 84px чтобы 4-5 словные title не
+              // ломались в 3-4 строки в узкой колонке хero-сетки
+              // (Saint Laurent ~72px, Toteme ~56px — это норма premium-tier).
+              // 5.2vw вместо 6.2vw — мягче рост на широких экранах.
+              fontSize: "clamp(36px, 5.2vw, 72px)",
               color: "var(--ink)",
             }}
           >

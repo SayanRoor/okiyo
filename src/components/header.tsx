@@ -31,16 +31,17 @@ export function Header({
   const brandSpaced = brandName.split("").join(" ");
 
   // Дефолтная «бегущая строка» преимуществ для top-bar.
-  // Premium-tier формулировки: короткие, ритмичные, без «продаж» —
-  // только факты + место (как у Loewe / Toteme / Mykita).
+  // Согласована с hero subtitle: те же три выгоды (Алматы → Казахстан → товар),
+  // чтобы посетитель видел повтор сообщений и наверху, и в первом экране.
+  // Premium-tier формулировки: короткие, ритмичные, без «продаж».
   // Перетянуть строки можно в админке Settings → topbar.
   const topbar =
     settings.topbar && settings.topbar.length > 0
       ? settings.topbar
       : [
           { text: "Алматы — бесплатно, за 2 часа" },
-          { text: "По Казахстану — транспортной компанией" },
-          { text: "Бессрочная гарантия каркаса" },
+          { text: "По Казахстану — Kaspi PickUp или Казпочтой" },
+          { text: "Поляризация UV400 в каждой паре" },
         ];
 
   const waNumber = sanitizePhone(settings.whatsapp);
