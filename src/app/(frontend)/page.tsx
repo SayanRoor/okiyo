@@ -2,32 +2,18 @@ import Link from "next/link";
 
 import { CollectionGrid } from "@/components/collection-grid";
 import { HeroSlideshow } from "@/components/hero-slideshow";
-import { ReviewsBlock, type Review } from "@/components/reviews-block";
+// ReviewsBlock временно не используется — коллекция reviews откатана,
+// чтобы вернуть админку. После переработки миграции (через payload
+// generate:migrations вместо ручного SQL) вернём импорт + safeFindReviews.
+// import { ReviewsBlock, type Review } from "@/components/reviews-block";
 import { mediaAlt, mediaUrl } from "@/lib/format";
 import { payload } from "@/lib/payload";
 
 export const dynamic = "force-dynamic";
 
-// Лениво обёртываем reviews-find в try, потому что коллекция может ещё не
-// существовать в БД (до прогона миграции). В таком случае просто не покажем
-// блок — это не блокирует рендер главной.
-async function safeFindReviews(p: Awaited<ReturnType<typeof payload>>) {
-  try {
-    return await p.find({
-      collection: "reviews",
-      where: { isPublished: { equals: true } },
-      limit: 8,
-      sort: ["order", "-createdAt"],
-      depth: 1,
-    });
-  } catch {
-    return { docs: [] as unknown[] };
-  }
-}
-
 export default async function HomePage() {
   const p = await payload();
-  const [settings, collection, tryOnFirst, reviewsResult] = await Promise.all([
+  const [settings, collection, tryOnFirst] = await Promise.all([
     p.findGlobal({ slug: "settings" }),
     p.find({
       collection: "products",
@@ -52,10 +38,7 @@ export default async function HomePage() {
       sort: ["order", "-createdAt"],
       depth: 0,
     }),
-    safeFindReviews(p),
   ]);
-
-  const reviews = (reviewsResult.docs ?? []) as Review[];
 
   const tryOnSlug =
     (tryOnFirst.docs[0] as { slug?: string } | undefined)?.slug ?? null;
@@ -218,14 +201,13 @@ export default async function HomePage() {
         <CollectionGrid products={collection.docs} />
       </section>
 
-      {/* Отзывы — главный trust-signal для незнакомого бренда в KZ.
-          Показываются только если в админке есть хотя бы один опубликованный.
-          Иначе блок не рендерится — без «фейкового» наполнения. */}
-      {reviews.length > 0 ? (
-        <section className="container-x" id="reviews">
-          <ReviewsBlock reviews={reviews} />
-        </section>
-      ) : null}
+      {/* Отзывы временно отключены вместе с коллекцией reviews.
+          Будут возвращены после рабочей миграции:
+          {reviews.length > 0 ? (
+            <section className="container-x" id="reviews">
+              <ReviewsBlock reviews={reviews} />
+            </section>
+          ) : null} */}
     </>
   );
 }

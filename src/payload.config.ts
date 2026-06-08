@@ -9,7 +9,11 @@ import { Categories } from "./collections/Categories";
 import { Leads } from "./collections/Leads";
 import { Media } from "./collections/Media";
 import { Products } from "./collections/Products";
-import { Reviews } from "./collections/Reviews";
+// Reviews-коллекция временно отключена: миграция приводит схему БД к
+// состоянию, которое не совпадает с тем, что генерирует Drizzle, и admin
+// падает с server error. Включим обратно после переработки миграции через
+// payload generate:migrations (вместо ручного SQL).
+// import { Reviews } from "./collections/Reviews";
 import { Users } from "./collections/Users";
 import { Settings } from "./globals/Settings";
 import { migrations } from "./migrations";
@@ -27,7 +31,7 @@ export default buildConfig({
       titleSuffix: " — OKIYO admin",
     },
   },
-  collections: [Users, Media, Categories, Products, Reviews, Leads],
+  collections: [Users, Media, Categories, Products, Leads],
   globals: [Settings],
   editor: lexicalEditor(),
   db: postgresAdapter({

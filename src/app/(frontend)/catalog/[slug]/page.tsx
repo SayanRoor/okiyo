@@ -7,7 +7,8 @@ import { MobileStickyBar } from "@/components/mobile-sticky-bar";
 import { ProductCard } from "@/components/product-card";
 import { ProductFaq } from "@/components/product-faq";
 import { ProductGallery } from "@/components/product-gallery";
-import { ReviewsBlock, type Review } from "@/components/reviews-block";
+// ReviewsBlock временно отключён вместе с коллекцией reviews.
+// import { ReviewsBlock, type Review } from "@/components/reviews-block";
 import { TrackedLink } from "@/components/tracked-link";
 import { TrustStrip } from "@/components/trust-strip";
 import { TryOnButton } from "@/components/try-on-button";
@@ -207,77 +208,9 @@ export default async function ProductPage({ params, searchParams }: Params) {
 
   const soldOut = product.inStock === false;
 
-  // Отзывы по этому товару (привязанные к product_id) + общие отзывы про бренд
-  // (без привязки). Под товаром показываем первые, общие — как бонус.
-  // Если коллекции ещё нет — тихо игнорим (до прогона миграции).
-  type RawReview = {
-    id: number | string;
-    authorName: string;
-    rating: number;
-    text: string;
-    city?: string | null;
-    verified?: boolean | null;
-    photo?: unknown;
-    product?: { id: number | string } | number | string | null;
-  };
-  let productReviews: Review[] = [];
-  try {
-    const r = await p.find({
-      collection: "reviews",
-      where: {
-        and: [
-          { isPublished: { equals: true } },
-          {
-            or: [
-              { product: { equals: product.id } },
-              { product: { exists: false } },
-            ],
-          },
-        ],
-      },
-      limit: 12,
-      sort: ["order", "-createdAt"],
-      depth: 1,
-    });
-    productReviews = (r.docs as RawReview[]).map((d) => ({
-      id: d.id,
-      authorName: d.authorName,
-      rating: d.rating,
-      text: d.text,
-      city: d.city ?? null,
-      verified: d.verified ?? false,
-      photo: d.photo,
-    }));
-  } catch {
-    productReviews = [];
-  }
-
-  // AggregateRating: считаем СТРОГО отзывы привязанные к этому товару.
-  // Google понижает сайт, если рейтинг навешан на товар «из общего пула».
-  let productOnlyCount = 0;
-  let productOnlyAvg = 0;
-  try {
-    const onlyForProduct = await p.find({
-      collection: "reviews",
-      where: {
-        and: [
-          { isPublished: { equals: true } },
-          { product: { equals: product.id } },
-        ],
-      },
-      limit: 100,
-      depth: 0,
-    });
-    const docs = onlyForProduct.docs as { rating: number }[];
-    productOnlyCount = docs.length;
-    productOnlyAvg =
-      docs.length > 0
-        ? docs.reduce((s, x) => s + (Number(x.rating) || 0), 0) / docs.length
-        : 0;
-  } catch {
-    productOnlyCount = 0;
-    productOnlyAvg = 0;
-  }
+  // Reviews-коллекция временно отключена. Возвращаем после рабочей миграции.
+  const productOnlyCount = 0;
+  const productOnlyAvg = 0;
 
   // Абсолютный URL главного фото для JSON-LD (schema.org требует absolute).
   const mainImgRaw = product.mainImage as { url?: string | null; sizes?: Record<string, { url?: string | null }> } | null | undefined;
@@ -682,17 +615,8 @@ export default async function ProductPage({ params, searchParams }: Params) {
         </div>
       </div>
 
-      {/* Отзывы — главный trust-signal на странице товара.
-          Показываем как привязанные к этой модели, так и общие отзывы про бренд
-          (без product_id) — клиент видит, что бренд работает в принципе. */}
-      {productReviews.length > 0 ? (
-        <ReviewsBlock
-          reviews={productReviews}
-          eyebrow="Отзывы клиентов"
-          title="Что говорят о нас"
-          variant="grid"
-        />
-      ) : null}
+      {/* Отзывы временно отключены вместе с коллекцией reviews.
+          Возвращаются после рабочей миграции reviews. */}
 
       {related && related.docs.length > 0 ? (
         <section className="mt-20">
