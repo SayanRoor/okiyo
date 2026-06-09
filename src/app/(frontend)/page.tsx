@@ -71,7 +71,14 @@ export default async function HomePage() {
   // — CTA глагольно-активный.
   const heroEyebrow =
     settings.heroEyebrow || "Spring Collection 2026 · от 12 000 ₸";
-  const heroTitle = settings.heroTitle || "Очки японского дизайна";
+  // Сейфти-нет: если в админке остался старый title с префиксом «OKIYO ...»
+  // (бренд уже в шапке как логотип — дубль = шум, ломает вёрстку),
+  // автоматически снимаем префикс. Регулярка ловит любой регистр и
+  // разделители (пробел, тире, двоеточие).
+  const rawTitle = settings.heroTitle || "Очки японского дизайна";
+  const heroTitle = rawTitle
+    .replace(/^\s*OKIYO\s*[—\-:·]?\s*/i, "")
+    .trim();
   const heroSubtitle =
     settings.heroSubtitle ||
     "Поляризация UV400, прочные оправы из поликарбоната и металла. Доставка по Алматы за 2 часа, по Казахстану — Kaspi PickUp или Казпочтой.";
