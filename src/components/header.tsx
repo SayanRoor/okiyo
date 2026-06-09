@@ -34,15 +34,30 @@ export function Header({
   // Согласована с hero subtitle: те же три выгоды (Алматы → Казахстан → товар),
   // чтобы посетитель видел повтор сообщений и наверху, и в первом экране.
   // Premium-tier формулировки: короткие, ритмичные, без «продаж».
-  // Перетянуть строки можно в админке Settings → topbar.
-  const topbar =
-    settings.topbar && settings.topbar.length > 0
-      ? settings.topbar
-      : [
-          { text: "Алматы — бесплатно, за 2 часа" },
-          { text: "По Казахстану — Kaspi PickUp или Казпочтой" },
-          { text: "Поляризация UV400 в каждой паре" },
-        ];
+  const NEW_TOPBAR: { id?: string | null; text: string }[] = [
+    { text: "Алматы — бесплатно, за 2 часа" },
+    { text: "По Казахстану — Kaspi PickUp или Казпочтой" },
+    { text: "Поляризация UV400 в каждой паре" },
+  ];
+
+  // Smart default: код распознаёт «известный старый» набор фраз и
+  // подменяет на новый, не требуя ручной правки админки. Если менеджер
+  // вписал свои строки, не совпадающие со старыми, — оставляем как есть.
+  const OLD_TOPBAR_PATTERNS = new Set([
+    // Старый дефолт ещё до итераций — две строки про доставку
+    "Бесплатная доставка по Алматы|Привезём за 2 часа",
+    "Бесплатная доставка по Алматы|Привезем за 2 часа", // без ё
+    // Промежуточный дефолт с «транспортной компанией»
+    "Алматы — бесплатно, за 2 часа|По Казахстану — транспортной компанией|Бессрочная гарантия каркаса",
+  ]);
+
+  const isOldTopbar = (() => {
+    if (!settings.topbar || settings.topbar.length === 0) return true;
+    const key = settings.topbar.map((t) => t.text.trim()).join("|");
+    return OLD_TOPBAR_PATTERNS.has(key);
+  })();
+
+  const topbar = isOldTopbar ? NEW_TOPBAR : settings.topbar!;
 
   const waNumber = sanitizePhone(settings.whatsapp);
   // Телефон для click-to-call. На мобайле = звонок одним кликом,
